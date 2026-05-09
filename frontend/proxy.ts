@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // Check if we are trying to access a dashboard route
   if (request.nextUrl.pathname.startsWith('/dashboard')) {
     // In a real app, we should check if the JWT token is valid here or via a cookie.
