@@ -53,9 +53,22 @@ app.use('/api/config', configRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/loading-charges', loadingChargeRoutes);
 
+// Root landing
+app.get('/', (_req, res) => {
+  res.send(`
+    <div style="font-family: sans-serif; padding: 2rem; text-align: center;">
+      <h1>🚀 Antigravity ERP Backend</h1>
+      <p>Status: Online | Version: 1.0.1</p>
+      <hr style="margin: 2rem 0; opacity: 0.2;">
+      <p>API Base: <a href="/api/health">/api/health</a></p>
+      <p>Database Diagnostic: <a href="/api/db-check">/api/db-check</a></p>
+    </div>
+  `);
+});
+
 // Health check
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '1.0.0' });
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '1.0.1' });
 });
 
 // Database check
