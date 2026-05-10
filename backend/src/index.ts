@@ -106,8 +106,10 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 });
 
 app.listen(PORT, '0.0.0.0', async () => {
-  console.log(`🚀 Antigravity ERP Backend running on port ${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+  const startupTime = new Date().toISOString();
+  console.log(`🚀 Antigravity ERP Backend v1.0.2`);
+  console.log(`⏰ Startup Time: ${startupTime}`);
+  console.log(`🌐 Port: ${PORT}`);
   
   // Auto-sync database tables
   try {
