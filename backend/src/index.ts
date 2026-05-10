@@ -75,10 +75,19 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   });
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', async () => {
   console.log(`🚀 Antigravity ERP Backend running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 Database URL set: ${process.env.DATABASE_URL ? 'YES' : 'NO - THIS WILL CAUSE ERRORS'}`);
+  
+  // Auto-sync database tables
+  try {
+    const { execSync } = require('child_process');
+    console.log('🔄 Syncing database tables...');
+    execSync('node ./node_modules/prisma/build/index.js db push --accept-data-loss', { stdio: 'inherit' });
+    console.log('✅ Database synced successfully!');
+  } catch (error: any) {
+    console.error('❌ Database sync failed:', error.message);
+  }
 });
 
 export default app;
