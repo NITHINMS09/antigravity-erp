@@ -160,4 +160,50 @@ router.delete('/:id', authenticate, async (req: Request, res: Response) => {
   }
 });
 
+// POST /api/purchases/:id/payment
+router.post('/:id/payment', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { amount, method, notes } = req.body;
+
+    if (!amount || amount <= 0) {
+      res.status(400).json({ error: 'Valid payment amount is required.' });
+      return;
+    }
+
+    const purchase = await prisma.purchase.findUnique({ where: { id } });
+    if (!purchase) {
+      res.status(404).json({ error: 'Purchase not found.' });
+      return;
+    }
+
+    const newPaid = purchase.paidAmount + amount;
+    const newDue = Math.max(0, purchase.grandTotal - newPaid);
+    const newStatus = newPaid >= purchase.grandTotal ? 'paid' : 'partial';
+
+    // In a real app we might have a PurchasePayment table, but let's keep it simple
+    // and update the main record like the user requested.
+    await prisma.purchase.update({
+      where: { id },
+      data: { 
+        paidAmount: newPaid, 
+        dueAmount: newDue, 
+        paymentStatus: newStatus,
+        notes: purchase.notes ? `${purchase.notes}\n[Payment: ₹${amount} via ${method}]` : `[Payment: ₹${amount} via ${method}]`
+      },
+    });
+
+    // Update supplier due
+    await prisma.supplier.update({
+      where: { id: purchase.supplierId },
+      data: { totalDue: { decrement: amount } },
+    });
+
+    res.json({ message: 'Payment recorded successfully.', paidAmount: newPaid, dueAmount: newDue, status: newStatus });
+  } catch (error) {
+    console.error('Purchase payment error:', error);
+    res.status(500).json({ error: 'Failed to record payment.' });
+  }
+});
+
 export default router;

@@ -58,7 +58,7 @@ app.get('/', (_req, res) => {
   res.send(`
     <div style="font-family: sans-serif; padding: 2rem; text-align: center;">
       <h1>🚀 Antigravity ERP Backend</h1>
-      <p>Status: Online | Version: 1.0.1</p>
+      <p>Status: Online | Version: 1.1.0</p>
       <hr style="margin: 2rem 0; opacity: 0.2;">
       <p>API Base: <a href="/api/health">/api/health</a></p>
       <p>Database Diagnostic: <a href="/api/db-check">/api/db-check</a></p>
@@ -68,7 +68,7 @@ app.get('/', (_req, res) => {
 
 // Health check
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '1.0.1' });
+  res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '1.1.0' });
 });
 
 // Database check
@@ -93,7 +93,8 @@ app.use((req, res) => {
   res.status(404).json({ 
     error: 'Route not found', 
     path: req.path,
-    method: req.method
+    method: req.method,
+    hint: 'Check if backend has deployed the latest commit'
   });
 });
 
@@ -107,7 +108,7 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 
 app.listen(PORT, '0.0.0.0', async () => {
   const startupTime = new Date().toISOString();
-  console.log(`🚀 Antigravity ERP Backend v1.0.2`);
+  console.log(`🚀 Antigravity ERP Backend v1.1.0`);
   console.log(`⏰ Startup Time: ${startupTime}`);
   console.log(`🌐 Port: ${PORT}`);
   

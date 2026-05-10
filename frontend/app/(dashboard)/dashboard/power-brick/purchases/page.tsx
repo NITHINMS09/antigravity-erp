@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingCart, Plus, X, Trash2 } from 'lucide-react';
+import { ShoppingCart, Plus, X, Trash2, IndianRupee } from 'lucide-react';
 import api from '@/lib/api';
 import { formatCurrency, formatDate, PAYMENT_METHODS } from '@/lib/constants';
 
@@ -14,6 +14,22 @@ export default function PurchasesPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [showPayment, setShowPayment] = useState<any>(null);
+  const [payForm, setPayForm] = useState({ amount: 0, method: 'cash', notes: '' });
+
+  const handleRecordPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (payForm.amount <= 0) return alert('Enter a valid amount');
+    try {
+      await api.post(`/purchases/${showPayment.id}/payment`, payForm);
+      setShowPayment(null);
+      setPayForm({ amount: 0, method: 'cash', notes: '' });
+      fetchData();
+      alert('Payment recorded successfully');
+    } catch (err: any) {
+      alert(err.message || 'Failed to record payment');
+    }
+  };
 
   const [supplierId, setSupplierId] = useState('');
   const [newSupplierName, setNewSupplierName] = useState('');
@@ -205,12 +221,24 @@ export default function PurchasesPage() {
                   <td className="px-5 py-3 text-right text-sm font-semibold text-zinc-200">{formatCurrency(p.grandTotal)}</td>
                   <td className="px-5 py-3 text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${p.paymentStatus === 'paid' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}>{p.paymentStatus}</span></td>
                   <td className="px-5 py-3 text-right">
-                    <button 
-                      onClick={() => handleDeletePurchase(p.id, p.purchaseNumber)}
-                      className="p-1.5 rounded-lg hover:bg-red-500/10 text-zinc-500 hover:text-red-500 transition-colors"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex justify-end gap-1">
+                      {p.paymentStatus !== 'paid' && (
+                        <button 
+                          onClick={() => { setShowPayment(p); setPayForm({ amount: p.dueAmount, method: 'cash', notes: '' }); }}
+                          className="p-1.5 rounded-lg hover:bg-emerald-500/10 text-zinc-500 hover:text-emerald-500 transition-colors"
+                          title="Record Payment"
+                        >
+                          <IndianRupee className="w-4 h-4" />
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => handleDeletePurchase(p.id, p.purchaseNumber)}
+                        className="p-1.5 rounded-lg hover:bg-red-500/10 text-zinc-500 hover:text-red-500 transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -219,6 +247,39 @@ export default function PurchasesPage() {
           </table>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      {showPayment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowPayment(null)}>
+          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0f0f1a] p-6" onClick={e => e.stopPropagation()}>
+            <h2 className="text-lg font-semibold text-zinc-100 mb-1">Record Payment</h2>
+            <p className="text-sm text-zinc-500 mb-4">{showPayment.purchaseNumber} — Pending: {formatCurrency(showPayment.dueAmount)}</p>
+            <form onSubmit={handleRecordPayment} className="space-y-4">
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Amount ₹ *</label>
+                <input type="number" step="0.01" value={payForm.amount || ''} onChange={e => setPayForm({ ...payForm, amount: +e.target.value })} required
+                  className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-emerald-500/50" />
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Method</label>
+                <select value={payForm.method} onChange={e => setPayForm({ ...payForm, method: e.target.value })}
+                  className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none">
+                  {PAYMENT_METHODS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-zinc-500 mb-1">Notes</label>
+                <input type="text" value={payForm.notes} onChange={e => setPayForm({ ...payForm, notes: e.target.value })} placeholder="Any payment remarks"
+                  className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none" />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button type="button" onClick={() => setShowPayment(null)} className="flex-1 py-2.5 rounded-xl border border-white/10 text-zinc-400 text-sm hover:bg-white/5 transition-all">Cancel</button>
+                <button type="submit" className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-sm font-medium hover:from-emerald-600 hover:to-emerald-700 transition-all shadow-lg shadow-emerald-500/20">Save Payment</button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
     </motion.div>
   );
 }
