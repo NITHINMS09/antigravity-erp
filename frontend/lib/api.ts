@@ -37,22 +37,26 @@ class ApiClient {
         headers,
       });
 
+      const text = await response.text();
+      let data: any = null;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch (e) {
+        data = text; // Fallback to raw text if not JSON
+      }
+
       if (!response.ok) {
         let errorMessage = `HTTP ${response.status}`;
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorData.message || errorMessage;
-        } catch (e) {
-          // If response is not JSON, try text
-          const text = await response.text().catch(() => '');
-          if (text) errorMessage = text.substring(0, 100);
+        if (typeof data === 'object' && data !== null) {
+          errorMessage = data.error || data.message || errorMessage;
+        } else if (typeof data === 'string' && data) {
+          errorMessage = data.substring(0, 100);
         }
-        
         console.error(`API Error [${endpoint}]:`, errorMessage);
         throw new Error(errorMessage);
       }
 
-      return response.json();
+      return data;
     } catch (error: any) {
       if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
         console.error('Network Error: Check if the backend is running and reachable.');
