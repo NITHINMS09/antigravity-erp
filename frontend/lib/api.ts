@@ -41,7 +41,10 @@ class ApiClient {
     }
 
     try {
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      const fullUrl = `${this.baseUrl}${endpoint}`;
+      console.log(`[API Request] ${fetchOptions.method || 'GET'} ${fullUrl}`);
+      
+      const response = await fetch(fullUrl, {
         ...fetchOptions,
         headers,
       });

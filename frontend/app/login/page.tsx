@@ -127,6 +127,12 @@ function LoginForm() {
             </button>
           </form>
 
+        <div className="mt-8 pt-6 border-t border-white/10">
+          <p className="text-center text-xs text-white/30">
+            Debug Info: Connecting to {process.env.NEXT_PUBLIC_API_URL || '/api'}
+          </p>
+        </div>
+
           <div className="mt-6 text-center">
             <p className="text-sm text-zinc-500">
               Don&apos;t have an account?{' '}
