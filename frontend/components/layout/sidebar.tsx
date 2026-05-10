@@ -169,5 +169,6 @@ export default function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
         </div>
       )}
     </aside>
+    </>
   );
 }
