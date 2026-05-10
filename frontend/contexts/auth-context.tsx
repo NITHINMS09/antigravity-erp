@@ -48,6 +48,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     const data = await api.post('/auth/login', { email, password });
+    if (!data || !data.token) {
+      console.error('Invalid response from server:', data);
+      throw new Error('Received an empty or invalid response from the backend. Please check your Vercel BACKEND_URL setting.');
+    }
     localStorage.setItem('token', data.token);
     setToken(data.token);
     setUser(data.user);
@@ -55,6 +59,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = async (regData: { email: string; password: string; name: string; phone?: string }) => {
     const data = await api.post('/auth/register', regData);
+    if (!data || !data.token) {
+      console.error('Invalid response from server:', data);
+      throw new Error('Received an empty or invalid response from the backend. Please check your Vercel BACKEND_URL setting.');
+    }
     localStorage.setItem('token', data.token);
     setToken(data.token);
     setUser(data.user);
