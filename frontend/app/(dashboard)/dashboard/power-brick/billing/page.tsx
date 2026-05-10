@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, FileText, Eye, Search, IndianRupee, Filter, Printer, CheckCircle, Trash2, X, Loader2, User, Calendar, Truck, CreditCard, ChevronRight, Hash } from 'lucide-react';
+import { Plus, FileText, Search, Filter, Printer, CheckCircle, Trash2, X, Loader2, User, Calendar, Truck, CreditCard, Package } from 'lucide-react';
 import api from '@/lib/api';
 import { formatCurrency, formatDate, PAYMENT_METHODS } from '@/lib/constants';
 import Link from 'next/link';
@@ -38,7 +38,7 @@ export default function BillingPage() {
   const [labourCharge, setLabourCharge] = useState(0);
   const [paidAmount, setPaidAmount] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState('cash');
-  const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
+  const [invoiceDate, setInvoiceDate] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [successInvoice, setSuccessInvoice] = useState<any>(null);
 
@@ -62,7 +62,10 @@ export default function BillingPage() {
     }
   };
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { 
+    fetchData(); 
+    setInvoiceDate(new Date().toISOString().split('T')[0]);
+  }, []);
 
   const handleDeleteInvoice = async (id: string, invoiceNumber: string) => {
     if (!confirm(`Are you sure you want to delete invoice ${invoiceNumber}? This will also reverse stock and customer balance.`)) return;

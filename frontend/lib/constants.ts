@@ -58,10 +58,24 @@ export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
 }
 
-export function formatDate(date: string | Date): string {
-  return new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(date));
+export function formatDate(date: string | Date | null | undefined): string {
+  if (!date) return 'N/A';
+  try {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return 'Invalid Date';
+    return new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }).format(d);
+  } catch (e) {
+    return 'Invalid Date';
+  }
 }
 
-export function formatDateTime(date: string | Date): string {
-  return new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(date));
+export function formatDateTime(date: string | Date | null | undefined): string {
+  if (!date) return 'N/A';
+  try {
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return 'Invalid Date';
+    return new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(d);
+  } catch (e) {
+    return 'Invalid Date';
+  }
 }
