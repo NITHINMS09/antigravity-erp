@@ -7,7 +7,7 @@ import { Bell, Moon, Sun, Search, LogOut, User, Menu } from 'lucide-react';
 import { useState } from 'react';
 import { ROLES } from '@/lib/constants';
 
-export default function Topbar() {
+export default function Topbar({ onMenuClick }: { onMenuClick?: () => void }) {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const router = useRouter();
@@ -24,7 +24,10 @@ export default function Topbar() {
     <header className="h-16 border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl flex items-center justify-between px-4 md:px-6 shrink-0 z-40">
       {/* Left: Mobile menu + Search */}
       <div className="flex items-center gap-3 flex-1">
-        <button className="md:hidden text-zinc-400 hover:text-white transition-colors">
+        <button 
+          onClick={onMenuClick}
+          className="md:hidden text-zinc-400 hover:text-white transition-colors"
+        >
           <Menu className="w-5 h-5" />
         </button>
         <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/5 flex-1 max-w-sm">

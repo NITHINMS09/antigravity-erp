@@ -51,7 +51,12 @@ const navGroups = [
   },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  mobileOpen?: boolean;
+  setMobileOpen?: (open: boolean) => void;
+}
+
+export default function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
     'Overview': true, 'POWER BRICK 🧱': true, 'BAKE LAND 🍞': true, 'Management': true,
@@ -63,7 +68,22 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className={`hidden md:flex flex-col border-r border-white/5 bg-[#0a0a0f] transition-all duration-300 ${collapsed ? 'w-[68px]' : 'w-64'}`}>
+    <>
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] md:hidden"
+          onClick={() => setMobileOpen?.(false)}
+        />
+      )}
+
+      <aside className={`
+        fixed md:static inset-y-0 left-0 z-[70]
+        flex flex-col border-r border-white/5 bg-[#0a0a0f] 
+        transition-all duration-300 
+        ${collapsed ? 'w-[68px]' : 'w-64'}
+        ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 h-16 border-b border-white/5 shrink-0">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-purple-600 flex items-center justify-center shrink-0 shadow-lg shadow-orange-500/20">
@@ -107,6 +127,7 @@ export default function Sidebar() {
                       <Link
                         key={item.href}
                         href={item.href}
+                        onClick={() => setMobileOpen?.(false)}
                         className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all relative group ${
                           isActive
                             ? 'bg-gradient-to-r from-orange-500/10 to-purple-500/10 text-orange-400'
