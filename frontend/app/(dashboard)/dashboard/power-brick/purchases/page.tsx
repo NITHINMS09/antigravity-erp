@@ -3,8 +3,6 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, Plus, X, Trash2, IndianRupee, Search, Loader2, Calendar, User, Package, CreditCard } from 'lucide-center';
-// Wait, I used 'lucide-center', should be 'lucide-react'
 import { Plus as PlusIcon, X as XIcon, Trash2 as TrashIcon, IndianRupee as RupeeIcon, Search as SearchIcon, Loader2 as LoaderIcon, Calendar as CalendarIcon, User as UserIcon, Package as PackageIcon, CreditCard as CardIcon, ShoppingCart as CartIcon } from 'lucide-react';
 import api from '@/lib/api';
 import { formatCurrency, formatDate, PAYMENT_METHODS } from '@/lib/constants';
@@ -131,8 +129,8 @@ export default function PurchasesPage() {
   };
 
   const filtered = purchases.filter(p => 
-    p.purchaseNumber.toLowerCase().includes(search.toLowerCase()) || 
-    p.supplier?.name.toLowerCase().includes(search.toLowerCase())
+    (p.purchaseNumber || '').toLowerCase().includes(search.toLowerCase()) || 
+    (p.supplier?.name || '').toLowerCase().includes(search.toLowerCase())
   );
 
   if (loading) return (

@@ -125,9 +125,9 @@ export default function BillingPage() {
   };
 
   const filtered = invoices.filter(inv => 
-    inv.invoiceNumber.toLowerCase().includes(search.toLowerCase()) || 
-    inv.customer?.name.toLowerCase().includes(search.toLowerCase()) ||
-    inv.vehicleNumber?.toLowerCase().includes(search.toLowerCase())
+    (inv.invoiceNumber || '').toLowerCase().includes(search.toLowerCase()) || 
+    (inv.customer?.name || '').toLowerCase().includes(search.toLowerCase()) ||
+    (inv.vehicleNumber || '').toLowerCase().includes(search.toLowerCase())
   );
 
   if (loading) return (
@@ -267,7 +267,7 @@ export default function BillingPage() {
                         <select value={item.materialId} onChange={e => updateItem(i, 'materialId', e.target.value)}
                           className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-orange-500/50 appearance-none">
                           <option value="" className="bg-[#1a1a2e]">Select Material</option>
-                          {materials.map(m => <option key={m.id} value={m.id} className="bg-[#1a1a2e]">{m.name} (Stock: {m.stock})</option>)}
+                          {materials.map(m => <option key={m.id} value={m.id} className="bg-[#1a1a2e]">{m.name} (Stock: {m.stock?.quantity || 0})</option>)}
                         </select>
                       </div>
                       <div className="col-span-4 md:col-span-2">
