@@ -35,6 +35,7 @@ const navGroups = [
       { href: '/dashboard/bake-land/sales', label: 'Daily Sales', icon: Receipt },
       { href: '/dashboard/bake-land/products', label: 'Products', icon: CakeSlice },
       { href: '/dashboard/bake-land/inventory', label: 'Inventory', icon: Warehouse },
+      { href: '/dashboard/bake-land/purchases', label: 'Purchases', icon: ShoppingCart },
       { href: '/dashboard/bake-land/workers', label: 'Workers', icon: HardHat },
       { href: '/dashboard/bake-land/expenses', label: 'Expenses', icon: Banknote },
     ],
