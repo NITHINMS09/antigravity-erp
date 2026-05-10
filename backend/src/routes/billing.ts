@@ -69,7 +69,7 @@ router.post('/', authenticate, async (req: Request, res: Response) => {
   try {
     const {
       customerId, business, isGst, items, vehicleNumber, driverName,
-      discountPercent, discountAmount, loadingCharge, transportCharge,
+      discountPercent, discountAmount, loadingCharge, loadingWorkerId, transportCharge,
       tractorCharge, labourCharge, paidAmount, paymentMethod, notes, dueDate,
     } = req.body;
 
@@ -143,6 +143,7 @@ router.post('/', authenticate, async (req: Request, res: Response) => {
         paymentMethod,
         vehicleNumber,
         driverName,
+        loadingWorkerId,
         notes,
         dueDate: dueDate ? new Date(dueDate) : undefined,
         items: { create: processedItems },
@@ -188,6 +189,30 @@ router.post('/', authenticate, async (req: Request, res: Response) => {
             referenceType: 'SALE',
             notes: `Invoice ${invoiceNumber}`,
           },
+        });
+      }
+    }
+    
+    // Credit loading charge to worker if selected
+    if (loadingWorkerId && loadingCharge > 0) {
+      const worker = await prisma.worker.findUnique({ where: { id: loadingWorkerId } });
+      if (worker) {
+        await prisma.worker.update({
+          where: { id: loadingWorkerId },
+          data: {
+            totalEarned: { increment: loadingCharge },
+            pendingSalary: { increment: loadingCharge },
+          }
+        });
+        
+        await prisma.workerPayment.create({
+          data: {
+            workerId: loadingWorkerId,
+            amount: loadingCharge,
+            type: 'bonus', // Using bonus type for loading commission
+            notes: `Loading commission from Invoice ${invoiceNumber}`,
+            paidAt: new Date(),
+          }
         });
       }
     }

@@ -18,6 +18,7 @@ export default function BillingPage() {
   const [materials, setMaterials] = useState<Material[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [invoices, setInvoices] = useState<any[]>([]);
+  const [workers, setWorkers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const { showToast } = useToast();
@@ -31,6 +32,7 @@ export default function BillingPage() {
   const [items, setItems] = useState<InvoiceItem[]>([{ materialId: '', quantity: 0, rate: 0, gstRate: 0 }]);
   const [discountPercent, setDiscountPercent] = useState(0);
   const [loadingCharge, setLoadingCharge] = useState(0);
+  const [loadingWorkerId, setLoadingWorkerId] = useState('');
   const [transportCharge, setTransportCharge] = useState(0);
   const [tractorCharge, setTractorCharge] = useState(0);
   const [labourCharge, setLabourCharge] = useState(0);
@@ -43,14 +45,16 @@ export default function BillingPage() {
   const fetchData = async (isSilent = false) => {
     if (!isSilent) setLoading(true);
     try {
-      const [mats, custs, invs] = await Promise.all([
-        api.get('/materials'),
-        api.get('/customers?business=POWER_BRICK'),
-        api.get('/billing?business=POWER_BRICK&limit=100'),
+      const [mats, custs, invs, wrks] = await Promise.all([
+        api.get('/materials').catch(() => ({ materials: [] })),
+        api.get('/customers?business=POWER_BRICK').catch(() => ({ customers: [] })),
+        api.get('/billing?business=POWER_BRICK&limit=100').catch(() => ({ invoices: [] })),
+        api.get('/workers?business=POWER_BRICK').catch(() => ({ workers: [] })),
       ]);
-      setMaterials(mats.materials.filter((m: any) => m.isActive));
-      setCustomers(custs.customers);
-      setInvoices(invs.invoices);
+      setMaterials((mats?.materials || []).filter((m: any) => m.isActive));
+      setCustomers(custs?.customers || []);
+      setInvoices(invs?.invoices || []);
+      setWorkers((wrks?.workers || []).filter((w: any) => w.isActive));
     } catch (err) {
       showToast('Failed to load billing data', 'error');
     } finally {
@@ -107,14 +111,14 @@ export default function BillingPage() {
 
       const invoice = await api.post('/billing', {
         customerId: custId, business: 'POWER_BRICK', isGst, items: validItems,
-        vehicleNumber, discountPercent, loadingCharge, transportCharge, tractorCharge,
+        vehicleNumber, discountPercent, loadingCharge, loadingWorkerId, transportCharge, tractorCharge,
         labourCharge, paidAmount, paymentMethod, invoiceDate,
       });
 
       showToast(`Invoice ${invoice.invoice.invoiceNumber} created!`);
       setItems([{ materialId: '', quantity: 0, rate: 0, gstRate: 0 }]);
       setCustomerId(''); setVehicleNumber(''); setDiscountPercent(0);
-      setLoadingCharge(0); setTransportCharge(0); setTractorCharge(0);
+      setLoadingCharge(0); setLoadingWorkerId(''); setTransportCharge(0); setTractorCharge(0);
       setLabourCharge(0); setPaidAmount(0);
       fetchData(true);
       setSuccessInvoice(invoice.invoice);
@@ -328,6 +332,17 @@ export default function BillingPage() {
                       </div>
                     </div>
                   ))}
+                  {loadingCharge > 0 && (
+                    <div className="pt-2 animate-in fade-in slide-in-from-top-1 duration-300">
+                      <label className="block text-[10px] font-black text-orange-500/70 mb-2 uppercase tracking-widest">Select Worker for Loading</label>
+                      <select value={loadingWorkerId} onChange={e => setLoadingWorkerId(e.target.value)}
+                        className="w-full px-4 py-3 rounded-2xl bg-orange-500/5 border border-orange-500/10 text-orange-200 text-xs font-bold outline-none appearance-none focus:ring-1 focus:ring-orange-500/30">
+                        <option value="" className="bg-[#1a1a2e]">-- Select Worker --</option>
+                        {workers.map(w => <option key={w.id} value={w.id} className="bg-[#1a1a2e]">{w.name}</option>)}
+                      </select>
+                      <p className="text-[9px] text-zinc-600 mt-2 italic px-1 leading-tight">Selecting a worker will automatically credit the loading charge to their earnings.</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
