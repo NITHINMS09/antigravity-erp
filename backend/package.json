@@ -5,12 +5,10 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "node ./node_modules/prisma/build/index.js generate && tsc",
     "start": "node dist/index.js",
-    "postinstall": "prisma generate",
-    "db:push": "prisma db push",
-    "db:seed": "tsx prisma/seed.ts",
-    "db:studio": "prisma studio"
+    "db:push": "node ./node_modules/prisma/build/index.js db push",
+    "db:studio": "node ./node_modules/prisma/build/index.js studio"
   },
   "dependencies": {
     "@prisma/client": "^6.9.0",

@@ -5,7 +5,7 @@ services:
     plan: free
     rootDir: backend
     buildCommand: npm install && npm run build
-    startCommand: node -e "const{execSync}=require('child_process');try{execSync('npx prisma db push --accept-data-loss',{stdio:'inherit'})}catch(e){console.log('DB push skipped')}" && node dist/index.js
+    startCommand: node -e "try{require('child_process').execSync('node ./node_modules/prisma/build/index.js db push --accept-data-loss',{stdio:'inherit'})}catch(e){console.log('DB push skipped:',e.message)}" && node dist/index.js
     envVars:
       - key: NODE_ENV
         value: production
