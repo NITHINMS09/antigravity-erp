@@ -57,6 +57,22 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString(), version: '1.0.0' });
 });
 
+// Database check
+app.get('/api/db-check', async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: 'connected', message: 'Database is working perfectly!' });
+  } catch (error: any) {
+    console.error('DB Check failed:', error);
+    res.status(500).json({ 
+      status: 'error', 
+      message: error.message,
+      code: error.code,
+      meta: error.meta
+    });
+  }
+});
+
 // 404 handler
 app.use((req, res) => {
   console.log(`[404] Route not found: ${req.method} ${req.path}`);
