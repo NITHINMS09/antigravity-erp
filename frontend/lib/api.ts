@@ -1,4 +1,13 @@
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+// Ensure the base URL always ends with /api
+function getApiBaseUrl(): string {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!envUrl) return '/api';
+  // Remove trailing slash and ensure it ends with /api
+  const clean = envUrl.replace(/\/+$/, '');
+  if (clean.endsWith('/api')) return clean;
+  return `${clean}/api`;
+}
+export const API_BASE_URL = getApiBaseUrl();
 
 interface FetchOptions extends RequestInit {
   token?: string;
