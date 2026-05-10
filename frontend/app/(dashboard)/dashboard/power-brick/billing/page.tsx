@@ -32,7 +32,7 @@ export default function BillingPage() {
   const [items, setItems] = useState<InvoiceItem[]>([{ materialId: '', quantity: 0, rate: 0, gstRate: 0 }]);
   const [discountPercent, setDiscountPercent] = useState(0);
   const [loadingCharge, setLoadingCharge] = useState(0);
-  const [loadingWorkerId, setLoadingWorkerId] = useState('');
+  const [loadingWorkerIds, setLoadingWorkerIds] = useState<string[]>([]);
   const [transportCharge, setTransportCharge] = useState(0);
   const [tractorCharge, setTractorCharge] = useState(0);
   const [labourCharge, setLabourCharge] = useState(0);
@@ -114,14 +114,14 @@ export default function BillingPage() {
 
       const invoice = await api.post('/billing', {
         customerId: custId, business: 'POWER_BRICK', isGst, items: validItems,
-        vehicleNumber, discountPercent, loadingCharge, loadingWorkerId, transportCharge, tractorCharge,
+        vehicleNumber, discountPercent, loadingCharge, loadingWorkerIds, transportCharge, tractorCharge,
         labourCharge, paidAmount, paymentMethod, invoiceDate,
       });
 
       showToast(`Invoice ${invoice.invoice.invoiceNumber} created!`);
       setItems([{ materialId: '', quantity: 0, rate: 0, gstRate: 0 }]);
       setCustomerId(''); setVehicleNumber(''); setDiscountPercent(0);
-      setLoadingCharge(0); setLoadingWorkerId(''); setTransportCharge(0); setTractorCharge(0);
+      setLoadingCharge(0); setLoadingWorkerIds([]); setTransportCharge(0); setTractorCharge(0);
       setLabourCharge(0); setPaidAmount(0);
       fetchData(true);
       setSuccessInvoice(invoice.invoice);
@@ -336,14 +336,39 @@ export default function BillingPage() {
                     </div>
                   ))}
                   {loadingCharge > 0 && (
-                    <div className="pt-2 animate-in fade-in slide-in-from-top-1 duration-300">
-                      <label className="block text-[10px] font-black text-orange-500/70 mb-2 uppercase tracking-widest">Select Worker for Loading</label>
-                      <select value={loadingWorkerId} onChange={e => setLoadingWorkerId(e.target.value)}
-                        className="w-full px-4 py-3 rounded-2xl bg-orange-500/5 border border-orange-500/10 text-orange-200 text-xs font-bold outline-none appearance-none focus:ring-1 focus:ring-orange-500/30">
-                        <option value="" className="bg-[#1a1a2e]">-- Select Worker --</option>
-                        {workers.map(w => <option key={w.id} value={w.id} className="bg-[#1a1a2e]">{w.name}</option>)}
-                      </select>
-                      <p className="text-[9px] text-zinc-600 mt-2 italic px-1 leading-tight">Selecting a worker will automatically credit the loading charge to their earnings.</p>
+                    <div className="pt-2 space-y-3 animate-in fade-in slide-in-from-top-1 duration-300">
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-[10px] font-black text-orange-500/70 uppercase tracking-widest">Select Loading Workers</label>
+                        <button type="button" onClick={() => setLoadingWorkerIds(loadingWorkerIds.length === workers.length ? [] : workers.map(w => w.id))}
+                          className="text-[9px] font-black text-orange-400/60 uppercase hover:text-orange-400 transition-colors">
+                          {loadingWorkerIds.length === workers.length ? 'Deselect All' : 'Select All'}
+                        </button>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-2">
+                        {workers.map(w => (
+                          <button key={w.id} type="button" 
+                            onClick={() => setLoadingWorkerIds(prev => prev.includes(w.id) ? prev.filter(id => id !== w.id) : [...prev, w.id])}
+                            className={`px-3 py-2.5 rounded-xl border text-[10px] font-bold transition-all text-left flex items-center justify-between ${
+                              loadingWorkerIds.includes(w.id) 
+                              ? 'bg-orange-500/10 border-orange-500/30 text-orange-400' 
+                              : 'bg-white/5 border-white/5 text-zinc-500 hover:border-white/10'
+                            }`}>
+                            <span className="truncate">{w.name}</span>
+                            {loadingWorkerIds.includes(w.id) && <CheckCircle className="w-3 h-3 flex-shrink-0" />}
+                          </button>
+                        ))}
+                      </div>
+
+                      {loadingWorkerIds.length > 0 && (
+                        <div className="p-3 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
+                          <p className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest text-center">
+                            Split: {formatCurrency(loadingCharge / loadingWorkerIds.length)} each
+                          </p>
+                        </div>
+                      )}
+                      
+                      <p className="text-[9px] text-zinc-600 italic px-1 leading-tight">Amount will be divided equally among {loadingWorkerIds.length} worker(s).</p>
                     </div>
                   )}
                 </div>

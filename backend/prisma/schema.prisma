@@ -209,7 +209,7 @@ model Invoice {
   transportCharge Float    @default(0)
   tractorCharge   Float    @default(0)
   labourCharge    Float    @default(0)
-  loadingWorkerId String?
+  loadingWorkerIds String?
   grandTotal      Float    @default(0)
   
   // Payment

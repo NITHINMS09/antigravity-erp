@@ -69,7 +69,7 @@ router.post('/', authenticate, async (req: Request, res: Response) => {
   try {
     const {
       customerId, business, isGst, items, vehicleNumber, driverName,
-      discountPercent, discountAmount, loadingCharge, loadingWorkerId, transportCharge,
+      discountPercent, discountAmount, loadingCharge, loadingWorkerIds, transportCharge,
       tractorCharge, labourCharge, paidAmount, paymentMethod, notes, dueDate,
     } = req.body;
 
@@ -143,7 +143,7 @@ router.post('/', authenticate, async (req: Request, res: Response) => {
         paymentMethod,
         vehicleNumber,
         driverName,
-        loadingWorkerId,
+        loadingWorkerIds: Array.isArray(loadingWorkerIds) ? loadingWorkerIds.join(',') : loadingWorkerIds,
         notes,
         dueDate: dueDate ? new Date(dueDate) : undefined,
         items: { create: processedItems },
@@ -193,27 +193,34 @@ router.post('/', authenticate, async (req: Request, res: Response) => {
       }
     }
     
-    // Credit loading charge to worker if selected
-    if (loadingWorkerId && loadingCharge > 0) {
-      const worker = await prisma.worker.findUnique({ where: { id: loadingWorkerId } });
-      if (worker) {
-        await prisma.worker.update({
-          where: { id: loadingWorkerId },
-          data: {
-            totalEarned: { increment: loadingCharge },
-            pendingSalary: { increment: loadingCharge },
-          }
-        });
+    // Credit loading charge to workers if selected
+    if (loadingWorkerIds && loadingCharge > 0) {
+      const workerIds = Array.isArray(loadingWorkerIds) ? loadingWorkerIds : loadingWorkerIds.split(',').filter(Boolean);
+      if (workerIds.length > 0) {
+        const amountPerWorker = loadingCharge / workerIds.length;
         
-        await prisma.workerPayment.create({
-          data: {
-            workerId: loadingWorkerId,
-            amount: loadingCharge,
-            type: 'bonus', // Using bonus type for loading commission
-            notes: `Loading commission from Invoice ${invoiceNumber}`,
-            paidAt: new Date(),
+        for (const wId of workerIds) {
+          const worker = await prisma.worker.findUnique({ where: { id: wId } });
+          if (worker) {
+            await prisma.worker.update({
+              where: { id: wId },
+              data: {
+                totalEarned: { increment: amountPerWorker },
+                pendingSalary: { increment: amountPerWorker },
+              }
+            });
+            
+            await prisma.workerPayment.create({
+              data: {
+                workerId: wId,
+                amount: amountPerWorker,
+                type: 'bonus',
+                notes: `Loading commission (split) from Invoice ${invoiceNumber}`,
+                paidAt: new Date(),
+              }
+            });
           }
-        });
+        }
       }
     }
 
