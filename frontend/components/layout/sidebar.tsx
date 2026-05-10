@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Package, FileText, Users, Truck, HardHat, ShoppingCart,
   BarChart3, Settings, Zap, ChevronLeft, CakeSlice, Warehouse, Receipt,
-  Home, BoltIcon, Banknote, ChevronDown
+  Home, BoltIcon, Banknote, ChevronDown, X
 } from 'lucide-react';
 
 const navGroups = [
@@ -95,7 +95,16 @@ export default function Sidebar({ mobileOpen, setMobileOpen }: SidebarProps) {
             <p className="text-[10px] text-zinc-600 whitespace-nowrap">ERP System</p>
           </motion.div>
         )}
-        <button onClick={() => setCollapsed(!collapsed)} className="ml-auto text-zinc-600 hover:text-zinc-300 transition-colors p-1">
+        
+        {/* Mobile Close Button */}
+        <button 
+          onClick={() => setMobileOpen?.(false)}
+          className="md:hidden ml-auto p-2 text-zinc-400 hover:text-white"
+        >
+          <X className="w-6 h-6" />
+        </button>
+
+        <button onClick={() => setCollapsed(!collapsed)} className="hidden md:block ml-auto text-zinc-600 hover:text-zinc-300 transition-colors p-1">
           <ChevronLeft className={`w-4 h-4 transition-transform ${collapsed ? 'rotate-180' : ''}`} />
         </button>
       </div>
