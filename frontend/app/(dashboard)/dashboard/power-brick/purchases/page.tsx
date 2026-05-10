@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingCart, Plus, X } from 'lucide-react';
+import { ShoppingCart, Plus, X, Trash2 } from 'lucide-react';
 import api from '@/lib/api';
 import { formatCurrency, formatDate, PAYMENT_METHODS } from '@/lib/constants';
 
@@ -42,6 +42,17 @@ export default function PurchasesPage() {
   };
 
   useEffect(() => { fetchData(); }, []);
+
+  const handleDeletePurchase = async (id: string, purchaseNumber: string) => {
+    if (!confirm(`Are you sure you want to delete purchase ${purchaseNumber}? This will also reverse the stock levels.`)) return;
+    try {
+      await api.delete(`/purchases/${id}`);
+      setPurchases(purchases.filter(p => p.id !== id));
+      alert('Purchase deleted successfully');
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete purchase');
+    }
+  };
 
   const addItem = () => setItems([...items, { materialId: '', quantity: 0, rate: 0 }]);
   const removeItem = (i: number) => items.length > 1 && setItems(items.filter((_, idx) => idx !== i));
@@ -182,6 +193,7 @@ export default function PurchasesPage() {
               <th className="text-left text-[11px] text-zinc-500 font-medium px-5 py-3">Items</th>
               <th className="text-right text-[11px] text-zinc-500 font-medium px-5 py-3">Total</th>
               <th className="text-center text-[11px] text-zinc-500 font-medium px-5 py-3">Status</th>
+              <th className="text-right text-[11px] text-zinc-500 font-medium px-5 py-3">Actions</th>
             </tr></thead>
             <tbody>
               {purchases.map(p => (
@@ -192,9 +204,17 @@ export default function PurchasesPage() {
                   <td className="px-5 py-3 text-xs text-zinc-500">{p.items?.map((it: any) => `${it.material?.name} (${it.quantity})`).join(', ')}</td>
                   <td className="px-5 py-3 text-right text-sm font-semibold text-zinc-200">{formatCurrency(p.grandTotal)}</td>
                   <td className="px-5 py-3 text-center"><span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${p.paymentStatus === 'paid' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}`}>{p.paymentStatus}</span></td>
+                  <td className="px-5 py-3 text-right">
+                    <button 
+                      onClick={() => handleDeletePurchase(p.id, p.purchaseNumber)}
+                      className="p-1.5 rounded-lg hover:bg-red-500/10 text-zinc-500 hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
                 </tr>
               ))}
-              {purchases.length === 0 && <tr><td colSpan={6} className="px-5 py-12 text-center text-zinc-600 text-sm">No purchases recorded yet. Click &quot;New Purchase&quot; to add one.</td></tr>}
+              {purchases.length === 0 && <tr><td colSpan={7} className="px-5 py-12 text-center text-zinc-600 text-sm">No purchases recorded yet. Click &quot;New Purchase&quot; to add one.</td></tr>}
             </tbody>
           </table>
         </div>

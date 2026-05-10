@@ -252,4 +252,50 @@ router.post('/:id/payment', authenticate, async (req: Request, res: Response) =>
   }
 });
 
+// DELETE /api/billing/:id
+router.delete('/:id', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    // Find the invoice first to get the due amount and customer ID
+    const invoice = await prisma.invoice.findUnique({ where: { id } });
+    
+    if (!invoice) {
+      res.status(404).json({ error: 'Invoice not found.' });
+      return;
+    }
+
+    // Update customer total due (subtract the due amount of this invoice)
+    if (invoice.dueAmount > 0) {
+      await prisma.customer.update({
+        where: { id: invoice.customerId },
+        data: { totalDue: { decrement: invoice.dueAmount } },
+      });
+    }
+
+    // Delete related items first (Cascade if not set in prisma, but let's be safe)
+    await prisma.invoiceItem.deleteMany({ where: { invoiceId: id } });
+    await prisma.payment.deleteMany({ where: { invoiceId: id } });
+
+    // Delete the invoice
+    await prisma.invoice.delete({ where: { id } });
+
+    // Activity log
+    await prisma.activityLog.create({
+      data: {
+        userId: req.user!.userId,
+        action: 'DELETE',
+        entity: 'Invoice',
+        entityId: id,
+        details: `Deleted invoice ${invoice.invoiceNumber}`,
+      },
+    });
+
+    res.json({ message: 'Invoice deleted successfully.' });
+  } catch (error: any) {
+    console.error('Delete invoice error:', error);
+    res.status(500).json({ error: 'Failed to delete invoice.' });
+  }
+});
+
 export default router;

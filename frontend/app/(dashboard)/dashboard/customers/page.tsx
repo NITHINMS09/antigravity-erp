@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Users, Plus, Phone, Search, IndianRupee } from 'lucide-react';
+import { Users, Plus, Phone, Search, IndianRupee, Trash2 } from 'lucide-react';
 import api from '@/lib/api';
 import { formatCurrency } from '@/lib/constants';
 
@@ -14,7 +14,22 @@ export default function CustomersPage() {
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', gstNumber: '', business: 'POWER_BRICK' });
 
-  useEffect(() => { api.get('/customers').then(d => setCustomers(d.customers)).finally(() => setLoading(false)); }, []);
+  const fetchCustomers = async () => {
+    setLoading(true);
+    api.get('/customers').then(d => setCustomers(d.customers)).finally(() => setLoading(false));
+  };
+
+  useEffect(() => { fetchCustomers(); }, []);
+
+  const handleDeleteCustomer = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete customer ${name}?`)) return;
+    try {
+      await api.delete(`/customers/${id}`);
+      setCustomers(customers.filter(c => c.id !== id));
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete customer');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +78,15 @@ export default function CustomersPage() {
             className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 hover:border-orange-500/20 transition-all">
             <div className="flex items-start justify-between">
               <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center"><Users className="w-5 h-5 text-blue-400" /></div>
-              {c.totalDue > 0 && <span className="text-[10px] bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full">Due: {formatCurrency(c.totalDue)}</span>}
+              <div className="flex items-center gap-2">
+                {c.totalDue > 0 && <span className="text-[10px] bg-red-500/10 text-red-400 px-2 py-0.5 rounded-full">Due: {formatCurrency(c.totalDue)}</span>}
+                <button 
+                  onClick={() => handleDeleteCustomer(c.id, c.name)}
+                  className="p-1.5 rounded-lg hover:bg-red-500/10 text-zinc-500 hover:text-red-500 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
             <h3 className="text-sm font-semibold text-zinc-200 mt-3">{c.name}</h3>
             {c.phone && <p className="text-xs text-zinc-500 flex items-center gap-1 mt-1"><Phone className="w-3 h-3" />{c.phone}</p>}

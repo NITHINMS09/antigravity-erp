@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, FileText, Eye, Search, IndianRupee, Filter, Printer, CheckCircle } from 'lucide-react';
+import { Plus, FileText, Eye, Search, IndianRupee, Filter, Printer, CheckCircle, Trash2 } from 'lucide-react';
 import api from '@/lib/api';
 import { formatCurrency, formatDate, PAYMENT_METHODS } from '@/lib/constants';
 import Link from 'next/link';
@@ -37,13 +37,37 @@ export default function BillingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [successInvoice, setSuccessInvoice] = useState<any>(null);
 
+  const fetchData = async () => {
+    try {
+      const [mats, custs, invs] = await Promise.all([
+        api.get('/materials'),
+        api.get('/customers?business=POWER_BRICK'),
+        api.get('/billing?business=POWER_BRICK&limit=50'),
+      ]);
+      setMaterials(mats.materials.filter((m: any) => m.isActive));
+      setCustomers(custs.customers);
+      setInvoices(invs.invoices);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    Promise.all([
-      api.get('/materials').then(d => setMaterials(d.materials.filter((m: any) => m.isActive))),
-      api.get('/customers?business=POWER_BRICK').then(d => setCustomers(d.customers)),
-      api.get('/billing?business=POWER_BRICK&limit=20').then(d => setInvoices(d.invoices)),
-    ]).catch(console.error).finally(() => setLoading(false));
+    fetchData();
   }, []);
+
+  const handleDeleteInvoice = async (id: string, invoiceNumber: string) => {
+    if (!confirm(`Are you sure you want to delete invoice ${invoiceNumber}? This will also update the customer's balance.`)) return;
+    try {
+      await api.delete(`/billing/${id}`);
+      setInvoices(invoices.filter(inv => inv.id !== id));
+      alert('Invoice deleted successfully');
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete invoice');
+    }
+  };
 
   const addItem = () => setItems([...items, { materialId: '', quantity: 0, rate: 0, gstRate: 0 }]);
   const removeItem = (i: number) => items.length > 1 && setItems(items.filter((_, idx) => idx !== i));
@@ -328,9 +352,17 @@ export default function BillingPage() {
                       }`}>{inv.paymentStatus}</span>
                     </td>
                     <td className="px-5 py-3 text-right">
-                      <Link href={`/print/invoice/${inv.id}`} target="_blank" className="inline-flex p-1.5 rounded-lg hover:bg-white/5 text-zinc-500 hover:text-orange-400 transition-colors" onClick={e => e.stopPropagation()}>
-                        <Printer className="w-4 h-4" />
-                      </Link>
+                      <div className="flex justify-end gap-1">
+                        <Link href={`/print/invoice/${inv.id}`} target="_blank" className="p-1.5 rounded-lg hover:bg-white/5 text-zinc-500 hover:text-orange-400 transition-colors" onClick={e => e.stopPropagation()}>
+                          <Printer className="w-4 h-4" />
+                        </Link>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); handleDeleteInvoice(inv.id, inv.invoiceNumber); }}
+                          className="p-1.5 rounded-lg hover:bg-red-500/10 text-zinc-500 hover:text-red-500 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -112,4 +112,52 @@ router.post('/', authenticate, async (req: Request, res: Response) => {
   }
 });
 
+// DELETE /api/purchases/:id
+router.delete('/:id', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const purchase = await prisma.purchase.findUnique({
+      where: { id },
+      include: { items: true },
+    });
+
+    if (!purchase) {
+      res.status(404).json({ error: 'Purchase not found.' });
+      return;
+    }
+
+    // Reverse stock for each item
+    for (const item of purchase.items) {
+      const stock = await prisma.stock.findUnique({ where: { materialId: item.materialId } });
+      if (stock) {
+        await prisma.stock.update({
+          where: { materialId: item.materialId },
+          data: { quantity: { decrement: item.quantity }, lastUpdated: new Date() },
+        });
+      }
+      // Delete stock movements related to this purchase
+      await prisma.stockMovement.deleteMany({
+        where: { reference: id, referenceType: 'PURCHASE' },
+      });
+    }
+
+    // Update supplier total due (subtract the due amount of this purchase)
+    if (purchase.dueAmount > 0) {
+      await prisma.supplier.update({
+        where: { id: purchase.supplierId },
+        data: { totalDue: { decrement: purchase.dueAmount } },
+      });
+    }
+
+    // Delete items and purchase
+    await prisma.purchaseItem.deleteMany({ where: { purchaseId: id } });
+    await prisma.purchase.delete({ where: { id } });
+
+    res.json({ message: 'Purchase deleted successfully.' });
+  } catch (error: any) {
+    console.error('Delete purchase error:', error);
+    res.status(500).json({ error: 'Failed to delete purchase.' });
+  }
+});
+
 export default router;

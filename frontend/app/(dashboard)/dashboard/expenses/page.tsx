@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Banknote, Plus, Zap, Home, Droplets } from 'lucide-react';
+import { Banknote, Plus, Zap, Home, Droplets, Trash2 } from 'lucide-react';
 import api from '@/lib/api';
 import { formatCurrency, formatDate, EXPENSE_CATEGORIES } from '@/lib/constants';
 
@@ -13,7 +13,21 @@ export default function ExpensesPage() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: '', amount: 0, category: 'miscellaneous', business: 'HOME', description: '', paymentMethod: 'cash', expenseDate: new Date().toISOString().split('T')[0] });
 
-  useEffect(() => { api.get('/expenses').then(d => setExpenses(d.expenses)).finally(() => setLoading(false)); }, []);
+  const fetchExpenses = async () => {
+    api.get('/expenses').then(d => setExpenses(d.expenses)).finally(() => setLoading(false));
+  };
+
+  useEffect(() => { fetchExpenses(); }, []);
+
+  const handleDeleteExpense = async (id: string, title: string) => {
+    if (!confirm(`Are you sure you want to delete expense "${title}"?`)) return;
+    try {
+      await api.delete(`/expenses/${id}`);
+      setExpenses(expenses.filter(e => e.id !== id));
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete expense');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +89,7 @@ export default function ExpensesPage() {
             <th className="text-left text-[11px] text-zinc-500 font-medium px-5 py-3">Category</th>
             <th className="text-left text-[11px] text-zinc-500 font-medium px-5 py-3">Date</th>
             <th className="text-right text-[11px] text-zinc-500 font-medium px-5 py-3">Amount</th>
+            <th className="text-right text-[11px] text-zinc-500 font-medium px-5 py-3">Actions</th>
           </tr></thead>
           <tbody>
             {expenses.map(e => (
@@ -83,6 +98,14 @@ export default function ExpensesPage() {
                 <td className="px-5 py-3"><span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 text-zinc-400">{e.category}</span></td>
                 <td className="px-5 py-3 text-sm text-zinc-500">{formatDate(e.createdAt)}</td>
                 <td className="px-5 py-3 text-right text-sm font-semibold text-red-400">{formatCurrency(e.amount)}</td>
+                <td className="px-5 py-3 text-right">
+                  <button 
+                    onClick={() => handleDeleteExpense(e.id, e.title)}
+                    className="p-1.5 rounded-lg hover:bg-red-500/10 text-zinc-500 hover:text-red-500 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </td>
               </tr>
             ))}
             {expenses.length === 0 && <tr><td colSpan={4} className="px-5 py-12 text-center text-zinc-600 text-sm">No expenses recorded yet.</td></tr>}
