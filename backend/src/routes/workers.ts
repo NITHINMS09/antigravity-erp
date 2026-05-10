@@ -67,11 +67,19 @@ router.put('/:id', authenticate, async (req: Request, res: Response) => {
 // DELETE /api/workers/:id
 router.delete('/:id', authenticate, async (req: Request, res: Response) => {
   try {
-    await prisma.worker.update({
-      where: { id: req.params.id },
-      data: { isActive: false },
-    });
-    res.json({ success: true, message: 'Worker removed successfully.' });
+    const { id } = req.params;
+    // Check if worker has attendance or payments
+    const attendanceCount = await prisma.workerAttendance.count({ where: { workerId: id } });
+    if (attendanceCount > 0) {
+      await prisma.worker.update({
+        where: { id },
+        data: { isActive: false },
+      });
+      res.json({ success: true, message: 'Worker deactivated (has history).' });
+    } else {
+      await prisma.worker.delete({ where: { id } });
+      res.json({ success: true, message: 'Worker permanently deleted.' });
+    }
   } catch (error) {
     res.status(500).json({ error: 'Failed to remove worker.' });
   }
@@ -81,7 +89,12 @@ router.delete('/:id', authenticate, async (req: Request, res: Response) => {
 router.post('/:id/attendance', authenticate, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { date, punchCount, isPresent, overtime, notes } = req.body;
+    const { date, punchCount, isPresent, overtime, notes, punchType } = req.body;
+
+    if (punchCount < 0 || overtime < 0) {
+      res.status(400).json({ error: 'Values cannot be negative.' });
+      return;
+    }
 
     const worker = await prisma.worker.findUnique({ where: { id } });
     if (!worker) { res.status(404).json({ error: 'Worker not found.' }); return; }
@@ -91,9 +104,37 @@ router.post('/:id/attendance', authenticate, async (req: Request, res: Response)
     const attendanceDate = date ? new Date(date) : new Date();
     attendanceDate.setHours(0, 0, 0, 0);
 
+    // Find existing attendance to handle stock reversal
+    const existing = await prisma.workerAttendance.findUnique({
+      where: { workerId_date: { workerId: id, date: attendanceDate } }
+    });
+
+    if (existing && existing.bricksProduced > 0 && existing.punchType) {
+      const oldMatCode = existing.punchType === '4_inch' ? '4_INCH_BRICK' : '6_INCH_BRICK';
+      const oldMat = await prisma.material.findUnique({ where: { code: oldMatCode } });
+      if (oldMat) {
+        await prisma.stock.update({
+          where: { materialId: oldMat.id },
+          data: { quantity: { decrement: existing.bricksProduced } }
+        });
+        await prisma.stockMovement.create({
+          data: {
+            materialId: oldMat.id, type: 'OUT', quantity: existing.bricksProduced,
+            referenceType: 'ADJUSTMENT', notes: `Reversed previous punch for ${worker.name} on ${attendanceDate.toDateString()}`
+          }
+        });
+      }
+    }
+
+    let bricksProduced = 0;
+    if (punchCount && punchType) {
+      if (punchType === '4_inch') bricksProduced = punchCount * 8;
+      else if (punchType === '6_inch') bricksProduced = punchCount * 5;
+    }
+
     const attendance = await prisma.workerAttendance.upsert({
       where: { workerId_date: { workerId: id, date: attendanceDate } },
-      update: { punchCount, isPresent, rate, dailyEarning, overtime, notes },
+      update: { punchCount, isPresent, rate, dailyEarning, overtime, notes, punchType, bricksProduced },
       create: {
         workerId: id,
         date: attendanceDate,
@@ -103,8 +144,40 @@ router.post('/:id/attendance', authenticate, async (req: Request, res: Response)
         dailyEarning,
         overtime: overtime || 0,
         notes,
+        punchType,
+        bricksProduced
       },
     });
+
+    if (bricksProduced > 0 && punchType) {
+      const materialCode = punchType === '4_inch' ? '4_INCH_BRICK' : '6_INCH_BRICK';
+      const materialName = punchType === '4_inch' ? '4 Inch Brick' : '6 Inch Brick';
+
+      let material = await prisma.material.findUnique({ where: { code: materialCode } });
+      if (!material) {
+        material = await prisma.material.create({
+          data: {
+            name: materialName, code: materialCode, unit: 'pieces', category: 'brick',
+            defaultRate: 0, gstRate: 0, sortOrder: 0
+          }
+        });
+        await prisma.stock.create({ data: { materialId: material.id, quantity: 0, minLevel: 0 } });
+      }
+
+      await prisma.stock.update({
+        where: { materialId: material.id },
+        data: { quantity: { increment: bricksProduced }, lastUpdated: new Date() }
+      });
+
+      const punchLabel = punchType === '4_inch' ? '4 Inch' : '6 Inch';
+      await prisma.stockMovement.create({
+        data: {
+          materialId: material.id, type: 'IN', quantity: bricksProduced,
+          referenceType: 'ADJUSTMENT',
+          notes: `Worker Punch: ${punchCount} punches of ${punchLabel} by ${worker.name}`
+        }
+      });
+    }
 
     // Update worker totals
     const totalEarned = await prisma.workerAttendance.aggregate({
@@ -132,11 +205,77 @@ router.post('/:id/attendance', authenticate, async (req: Request, res: Response)
   }
 });
 
+// DELETE /api/workers/attendance/:id
+router.delete('/attendance/:id', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const attendance = await prisma.workerAttendance.findUnique({
+      where: { id },
+      include: { worker: true }
+    });
+
+    if (!attendance) {
+      res.status(404).json({ error: 'Attendance record not found.' });
+      return;
+    }
+
+    // Reverse stock if bricks were produced
+    if (attendance.bricksProduced > 0 && attendance.punchType) {
+      const matCode = attendance.punchType === '4_inch' ? '4_INCH_BRICK' : '6_INCH_BRICK';
+      const material = await prisma.material.findUnique({ where: { code: matCode } });
+      if (material) {
+        await prisma.stock.update({
+          where: { materialId: material.id },
+          data: { quantity: { decrement: attendance.bricksProduced } }
+        });
+        await prisma.stockMovement.create({
+          data: {
+            materialId: material.id, type: 'OUT', quantity: attendance.bricksProduced,
+            referenceType: 'ADJUSTMENT', notes: `Deleted punch for ${attendance.worker.name} on ${attendance.date.toDateString()}`
+          }
+        });
+      }
+    }
+
+    const workerId = attendance.workerId;
+    await prisma.workerAttendance.delete({ where: { id } });
+
+    // Update worker totals
+    const totalEarned = await prisma.workerAttendance.aggregate({
+      where: { workerId },
+      _sum: { dailyEarning: true },
+    });
+    const totalPaid = await prisma.workerPayment.aggregate({
+      where: { workerId, type: { in: ['salary', 'advance'] } },
+      _sum: { amount: true },
+    });
+
+    await prisma.worker.update({
+      where: { id: workerId },
+      data: {
+        totalEarned: totalEarned._sum.dailyEarning || 0,
+        totalPaid: totalPaid._sum.amount || 0,
+        pendingSalary: (totalEarned._sum.dailyEarning || 0) - (totalPaid._sum.amount || 0),
+      },
+    });
+
+    res.json({ success: true, message: 'Attendance record deleted.' });
+  } catch (error) {
+    console.error('Delete attendance error:', error);
+    res.status(500).json({ error: 'Failed to delete attendance record.' });
+  }
+});
+
 // POST /api/workers/:id/payment
 router.post('/:id/payment', authenticate, async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { amount, type, method, period, notes } = req.body;
+
+    if (amount <= 0) {
+      res.status(400).json({ error: 'Amount must be positive.' });
+      return;
+    }
 
     const payment = await prisma.workerPayment.create({
       data: { workerId: id, amount, type: type || 'salary', method, period, notes },

@@ -96,4 +96,21 @@ router.get('/:id/dues', authenticate, async (req: Request, res: Response) => {
   }
 });
 
+// DELETE /api/customers/:id
+router.delete('/:id', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const invoicesCount = await prisma.invoice.count({ where: { customerId: id } });
+    if (invoicesCount > 0) {
+      res.status(400).json({ error: 'Cannot delete: Customer has existing invoices.' });
+      return;
+    }
+    await prisma.customer.delete({ where: { id } });
+    res.json({ success: true, message: 'Customer deleted successfully.' });
+  } catch (error) {
+    console.error('Delete customer error:', error);
+    res.status(500).json({ error: 'Failed to delete customer.' });
+  }
+});
+
 export default router;

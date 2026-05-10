@@ -9,6 +9,7 @@ import Sidebar from '@/components/layout/sidebar';
 import Topbar from '@/components/layout/topbar';
 import MobileNav from '@/components/layout/mobile-nav';
 import { Loader2 } from 'lucide-react';
+import { ToastProvider } from '@/components/Toast';
 
 function DashboardGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -50,7 +51,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <AuthProvider>
       <ThemeProvider>
-        <DashboardGuard>{children}</DashboardGuard>
+        <ToastProvider>
+          <DashboardGuard>{children}</DashboardGuard>
+        </ToastProvider>
       </ThemeProvider>
     </AuthProvider>
   );

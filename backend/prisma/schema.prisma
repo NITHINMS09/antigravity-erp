@@ -99,6 +99,7 @@ model Supplier {
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  business    String   @default("POWER_BRICK") // POWER_BRICK or BAKE_LAND
 
   purchases   Purchase[]
 }
@@ -129,7 +130,7 @@ model Material {
 model Stock {
   id          String   @id @default(cuid())
   materialId  String   @unique
-  material    Material @relation(fields: [materialId], references: [id])
+  material    Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
   quantity    Float    @default(0)
   minLevel    Float    @default(0)
   maxLevel    Float?
@@ -140,7 +141,7 @@ model Stock {
 model StockMovement {
   id          String   @id @default(cuid())
   materialId  String
-  material    Material @relation(fields: [materialId], references: [id])
+  material    Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
   type        String   // IN, OUT, ADJUSTMENT, WASTAGE
   quantity    Float
   reference   String?  // invoice ID or purchase ID
@@ -169,6 +170,7 @@ model Purchase {
   purchaseDate    DateTime @default(now())
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  business        String   @default("POWER_BRICK") // POWER_BRICK or BAKE_LAND
 
   items           PurchaseItem[]
 }
@@ -177,8 +179,10 @@ model PurchaseItem {
   id          String   @id @default(cuid())
   purchaseId  String
   purchase    Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
-  materialId  String
-  material    Material @relation(fields: [materialId], references: [id])
+  materialId  String?
+  material    Material? @relation(fields: [materialId], references: [id])
+  bakeryProductId String?
+  bakeryProduct   BakeryProduct? @relation(fields: [bakeryProductId], references: [id])
   quantity    Float
   rate        Float
   amount      Float
@@ -284,6 +288,8 @@ model WorkerAttendance {
   rate        Float    @default(0)
   dailyEarning Float   @default(0)
   overtime    Float    @default(0)
+  punchType   String?  // "4_inch" or "6_inch"
+  bricksProduced Int?  @default(0)
   notes       String?
   createdAt   DateTime @default(now())
 
@@ -357,6 +363,7 @@ model BakeryProduct {
   updatedAt   DateTime @updatedAt
 
   sales       BakerySaleItem[]
+  purchases   PurchaseItem[]
 }
 
 model BakerySale {

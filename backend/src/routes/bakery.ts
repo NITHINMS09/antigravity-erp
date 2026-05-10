@@ -26,6 +26,23 @@ router.put('/products/:id', authenticate, async (req: Request, res: Response) =>
   } catch (e) { res.status(500).json({ error: 'Failed to update product.' }); }
 });
 
+router.delete('/products/:id', authenticate, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    // Check if used in sales or purchases
+    const saleItem = await prisma.bakerySaleItem.findFirst({ where: { productId: id } });
+    const purchaseItem = await prisma.purchaseItem.findFirst({ where: { bakeryProductId: id } });
+
+    if (saleItem || purchaseItem) {
+      res.status(400).json({ error: 'Cannot delete: Product is used in a sale or purchase. Please deactivate instead.' });
+      return;
+    }
+
+    await prisma.bakeryProduct.delete({ where: { id } });
+    res.json({ success: true, message: 'Product deleted.' });
+  } catch (e) { res.status(500).json({ error: 'Failed to delete product.' }); }
+});
+
 // GET /api/bakery/sales — simple daily sales list
 router.get('/sales', authenticate, async (req: Request, res: Response) => {
   try {
