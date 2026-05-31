@@ -1,0 +1,309 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Organization {
+  id          String       @id @default(uuid())
+  name        String
+  logo        String?
+  industry    String?
+  size        String?
+  address     String?
+  website     String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  departments Department[]
+  users       User[]
+
+  @@map("organizations")
+}
+
+model Department {
+  id             String       @id @default(uuid())
+  name           String
+  description    String?
+  headId         String?
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  teams          Team[]
+  users          User[]
+  feedbacks      Feedback[]
+  aiInsights     AIInsight[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("departments")
+}
+
+model Team {
+  id           String     @id @default(uuid())
+  name         String
+  description  String?
+  leadId       String?
+  departmentId String
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  members      User[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("teams")
+}
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  password        String
+  firstName       String
+  lastName        String
+  employeeId      String?   @unique
+  phone           String?
+  avatar          String?
+  role            String    @default("EMPLOYEE")
+  jobTitle        String?
+  experienceLevel String?
+  organizationId  String?
+  organization    Organization? @relation(fields: [organizationId], references: [id])
+  departmentId    String?
+  department      Department?   @relation(fields: [departmentId], references: [id])
+  teamId          String?
+  team            Team?         @relation(fields: [teamId], references: [id])
+  isActive        Boolean   @default(true)
+  isAnonymous     Boolean   @default(false)
+  lastLogin       DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  feedbacks          Feedback[]
+  complaints         Complaint[]    @relation("ComplaintAuthor")
+  assignedComplaints Complaint[]    @relation("ComplaintAssignee")
+  notifications      Notification[]
+  emotionScores      EmotionScore[]
+  burnoutScores      BurnoutScore[]
+  wellnessReports    WellnessReport[]
+  chatMessages       ChatMessage[]
+  activityLogs       ActivityLog[]
+  badges             UserBadge[]
+  sentMessages       ChatMessage[]  @relation("SentMessages")
+
+  @@map("users")
+}
+
+model Feedback {
+  id                String    @id @default(uuid())
+  userId            String?
+  user              User?     @relation(fields: [userId], references: [id])
+  isAnonymous       Boolean   @default(false)
+  anonymousToken    String?
+  category          String
+  priority          String    @default("MEDIUM")
+  title             String
+  content           String
+  summary           String?
+  departmentId      String?
+  department        Department? @relation(fields: [departmentId], references: [id])
+  branch            String?
+  starRating        Int?
+  moodEmoji         String?
+  stressLevel       Int?
+  satisfactionScore Int?
+  keywords          String    @default("[]")
+  attachments       String    @default("[]")
+  voiceRecording    String?
+  language          String    @default("en")
+  translatedContent String?
+  sentimentScore    Float?
+  emotionDetected   String?
+  toxicityScore     Float?
+  urgencyScore      Float?
+  aiSummary         String?
+  aiCategory        String?
+  aiSuggestions     String    @default("[]")
+  status            String    @default("SUBMITTED")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  complaint     Complaint?
+  emotionScores EmotionScore[]
+  aiInsights    AIInsight[]
+
+  @@map("feedbacks")
+}
+
+model Complaint {
+  id              String    @id @default(uuid())
+  feedbackId      String    @unique
+  feedback        Feedback  @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+  authorId        String
+  author          User      @relation("ComplaintAuthor", fields: [authorId], references: [id])
+  assigneeId      String?
+  assignee        User?     @relation("ComplaintAssignee", fields: [assigneeId], references: [id])
+  status          String    @default("SUBMITTED")
+  priority        String    @default("MEDIUM")
+  aiResolution    String?
+  aiConfidence    Float?
+  escalationLevel Int       @default(0)
+  resolvedAt      DateTime?
+  closedAt        DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  resolutionHistory ResolutionHistory[]
+
+  @@map("complaints")
+}
+
+model ResolutionHistory {
+  id          String    @id @default(uuid())
+  complaintId String
+  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  action      String
+  description String
+  performedBy String
+  createdAt   DateTime  @default(now())
+
+  @@map("resolution_histories")
+}
+
+model AIInsight {
+  id           String      @id @default(uuid())
+  type         String
+  title        String
+  content      String
+  severity     String      @default("LOW")
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  feedbackId   String?
+  feedback     Feedback?   @relation(fields: [feedbackId], references: [id])
+  metadata     String?
+  isRead       Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@map("ai_insights")
+}
+
+model EmotionScore {
+  id         String    @id @default(uuid())
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id])
+  feedbackId String?
+  feedback   Feedback? @relation(fields: [feedbackId], references: [id])
+  emotion    String
+  score      Float
+  confidence Float
+  createdAt  DateTime  @default(now())
+
+  @@map("emotion_scores")
+}
+
+model BurnoutScore {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  score           Float
+  riskLevel       String
+  factors         String   @default("[]")
+  recommendations String   @default("[]")
+  createdAt       DateTime @default(now())
+
+  @@map("burnout_scores")
+}
+
+model WellnessReport {
+  id                String   @id @default(uuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id])
+  overallScore      Float
+  stressScore       Float
+  satisfactionScore Float
+  engagementScore   Float
+  moodTrend         String?
+  recommendations   String   @default("[]")
+  period            String
+  createdAt         DateTime @default(now())
+
+  @@map("wellness_reports")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  metadata  String?
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+model ChatMessage {
+  id         String   @id @default(uuid())
+  senderId   String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId String?
+  receiver   User?    @relation(fields: [receiverId], references: [id])
+  roomId     String?
+  content    String
+  isAI       Boolean  @default(false)
+  metadata   String?
+  createdAt  DateTime @default(now())
+
+  @@map("chat_messages")
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@map("activity_logs")
+}
+
+model UserBadge {
+  id       String   @id @default(uuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  badge    String
+  earnedAt DateTime @default(now())
+  metadata String?
+
+  @@unique([userId, badge])
+  @@map("user_badges")
+}
+
+model Poll {
+  id        String    @id @default(uuid())
+  question  String
+  options   String    @default("[]")
+  votes     String?
+  isActive  Boolean   @default(true)
+  createdBy String
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@map("polls")
+}
+
+model SystemSetting {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String
+  type  String @default("string")
+
+  @@map("system_settings")
+}

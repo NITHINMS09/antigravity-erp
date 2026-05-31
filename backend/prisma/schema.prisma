@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -25,6 +25,7 @@ model User {
   activityLogs  ActivityLog[]
   notifications Notification[]
   invoices      Invoice[]
+  bookings      Booking[]
 }
 
 model ActivityLog {
@@ -425,4 +426,36 @@ model AIReport {
   period      String?  // e.g., "2026-W19", "2026-05"
   generatedAt DateTime @default(now())
   createdAt   DateTime @default(now())
+}
+
+// ==================== MYSURU TRAVEL CLUB (BOOKINGS) ====================
+
+model Booking {
+  id            String   @id @default(cuid())
+  bookingId     String   @unique
+  customerName  String
+  phone         String
+  tourName      String
+  travelDate    DateTime
+  seats         Int
+  amountPaid    Float
+  paymentStatus String   @default("pending") // pending, completed, failed
+  bookingDate   DateTime @default(now())
+  
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  
+  receipt       Receipt?
+}
+
+model Receipt {
+  id            String   @id @default(cuid())
+  bookingId     String   @unique
+  booking       Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  pdfUrl        String?
+  whatsappSent  Boolean  @default(false)
+  sentAt        DateTime?
+  deliveryStatus String  @default("pending") // pending, sent, failed
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

@@ -22,6 +22,10 @@ app.use((req, _res, next) => {
   next();
 });
 
+// Serve public directory
+import path from 'path';
+app.use(express.static(path.join(__dirname, '../public')));
+
 // Routes
 import authRoutes from './routes/auth';
 import dashboardRoutes from './routes/dashboard';
@@ -37,6 +41,7 @@ import expenseRoutes from './routes/expenses';
 import configRoutes from './routes/config';
 import aiRoutes from './routes/ai';
 import loadingChargeRoutes from './routes/loading-charges';
+import bookingRoutes from './routes/bookings';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/dashboard', dashboardRoutes);
@@ -52,6 +57,7 @@ app.use('/api/expenses', expenseRoutes);
 app.use('/api/config', configRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/loading-charges', loadingChargeRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 // Root landing
 app.get('/', (_req, res) => {
