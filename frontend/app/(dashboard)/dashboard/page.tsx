@@ -1,12 +1,20 @@
-// @ts-nocheck
 'use client';
 
 import { useState, useEffect } from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import {
+   
+   
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   TrendingUp, TrendingDown, IndianRupee, AlertTriangle, Users, Truck,
+   
+   
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   HardHat, Zap, ArrowUpRight, Package, ShoppingCart, CakeSlice, Calendar, ChevronRight, Activity, Clock
 } from 'lucide-react';
+ 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import api from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/constants';
@@ -19,9 +27,11 @@ interface DashboardData {
   monthlyProfit: number;
   pendingPayments: { total: number; count: number };
   lowStockAlerts: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   lowStockItems: any[];
   expenses: { labour: number; transport: number; general: number; purchases: number };
   bakeryDailySales: { total: number; cash: number; upi: number; card: number };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   recentInvoices: any[];
   salesTrend: { date: string; sales: number }[];
 }

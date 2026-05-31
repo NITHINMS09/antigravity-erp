@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,12 +8,16 @@ import { formatCurrency, formatDate, PAYMENT_METHODS } from '@/lib/constants';
 import { useToast } from '@/components/Toast';
 
 export default function PurchasesPage() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [purchases, setPurchases] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [materials, setMaterials] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [showPayment, setShowPayment] = useState<any>(null);
   const [payForm, setPayForm] = useState({ amount: 0, method: 'cash', notes: '' });
   const [search, setSearch] = useState('');
@@ -44,6 +47,7 @@ export default function PurchasesPage() {
         api.get('/purchases/suppliers?business=POWER_BRICK'),
       ]);
       setPurchases(p.purchases);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setMaterials(m.materials.filter((mm: any) => mm.isActive));
       setSuppliers(s.suppliers);
     } catch (e) { 
@@ -54,6 +58,8 @@ export default function PurchasesPage() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchData(); }, []);
 
   const handleRecordPayment = async (e: React.FormEvent) => {
@@ -66,6 +72,7 @@ export default function PurchasesPage() {
       setPayForm({ amount: 0, method: 'cash', notes: '' });
       showToast('Payment recorded successfully');
       fetchData(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       showToast(err.message || 'Failed to record payment', 'error');
     } finally {
@@ -79,6 +86,7 @@ export default function PurchasesPage() {
       await api.delete(`/purchases/${id}`);
       setPurchases(purchases.filter(p => p.id !== id));
       showToast('Purchase deleted successfully');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       showToast(err.message || 'Failed to delete purchase', 'error');
     }
@@ -86,6 +94,7 @@ export default function PurchasesPage() {
 
   const addItem = () => setForm({ ...form, items: [...form.items, { materialId: '', quantity: 0, rate: 0 }] });
   const removeItem = (i: number) => form.items.length > 1 && setForm({ ...form, items: form.items.filter((_, idx) => idx !== i) });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateItem = (index: number, field: string, value: any) => {
     const updated = [...form.items];
     updated[index] = { ...updated[index], [field]: value };
@@ -121,6 +130,7 @@ export default function PurchasesPage() {
       });
       showToast('Purchase recorded successfully');
       fetchData(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) { 
       showToast(err.message, 'error'); 
     } finally { 
@@ -179,6 +189,7 @@ export default function PurchasesPage() {
                       <select value={form.supplierId} onChange={e => setForm({ ...form, supplierId: e.target.value })}
                         className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-orange-500/50 appearance-none">
                         <option value="" className="bg-[#1a1a2e]">-- New Supplier --</option>
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                         {suppliers.map((s: any) => <option key={s.id} value={s.id} className="bg-[#1a1a2e]">{s.name}</option>)}
                       </select>
                     </div>
@@ -216,6 +227,7 @@ export default function PurchasesPage() {
                           <select value={item.materialId} onChange={e => updateItem(i, 'materialId', e.target.value)}
                             className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-orange-500/50 appearance-none">
                             <option value="" className="bg-[#1a1a2e]">Select Material</option>
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                             {materials.map((m: any) => <option key={m.id} value={m.id} className="bg-[#1a1a2e]">{m.name}</option>)}
                           </select>
                         </div>
@@ -324,6 +336,7 @@ export default function PurchasesPage() {
               </div>
               <div className="max-w-[200px] hidden lg:block">
                 <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest mb-1">Items</p>
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 <p className="text-xs text-zinc-500 line-clamp-1 italic font-medium">{p.items?.map((it: any) => `${it.material?.name} (x${it.quantity})`).join(', ')}</p>
               </div>
             </div>

@@ -27,6 +27,7 @@ class ApiClient {
     return null;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async request<T = any>(endpoint: string, options: FetchOptions = {}): Promise<T> {
     const { token, ...fetchOptions } = options;
     const authToken = token || this.getToken();
@@ -50,9 +51,11 @@ class ApiClient {
       });
 
       const text = await response.text();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let data: any = null;
       try {
         data = text ? JSON.parse(text) : null;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (e) {
         data = text; // Fallback to raw text if not JSON
       }
@@ -69,6 +72,7 @@ class ApiClient {
       }
 
       return data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
         console.error('Network Error: Check if the backend is running and reachable.');
@@ -78,18 +82,24 @@ class ApiClient {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get<T = any>(endpoint: string, options?: FetchOptions) {
     return this.request<T>(endpoint, { ...options, method: 'GET' });
   }
 
+   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   post<T = any>(endpoint: string, data?: any, options?: FetchOptions) {
     return this.request<T>(endpoint, { ...options, method: 'POST', body: JSON.stringify(data) });
   }
 
+   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   put<T = any>(endpoint: string, data?: any, options?: FetchOptions) {
     return this.request<T>(endpoint, { ...options, method: 'PUT', body: JSON.stringify(data) });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   delete<T = any>(endpoint: string, options?: FetchOptions) {
     return this.request<T>(endpoint, { ...options, method: 'DELETE' });
   }

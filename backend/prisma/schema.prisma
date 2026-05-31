@@ -10,17 +10,17 @@ datasource db {
 // ==================== AUTH & USERS ====================
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  phone         String?  @unique
-  password      String
-  name          String
-  role          String   @default("staff") // super_admin, manager, accountant, worker_supervisor, bakery_staff, power_brick_staff
-  avatar        String?
-  isActive      Boolean  @default(true)
-  lastLogin     DateTime?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id        String    @id @default(cuid())
+  email     String    @unique
+  phone     String?   @unique
+  password  String
+  name      String
+  role      String    @default("staff") // super_admin, manager, accountant, worker_supervisor, bakery_staff, power_brick_staff
+  avatar    String?
+  isActive  Boolean   @default(true)
+  lastLogin DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   activityLogs  ActivityLog[]
   notifications Notification[]
@@ -29,102 +29,104 @@ model User {
 }
 
 model ActivityLog {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  action      String
-  entity      String
-  entityId    String?
-  details     String?
-  ipAddress   String?
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  entity    String
+  entityId  String?
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Notification {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  title       String
-  message     String
-  type        String   @default("info") // info, warning, success, error
-  isRead      Boolean  @default(false)
-  link        String?
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  type      String   @default("info") // info, warning, success, error
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
 }
 
 // ==================== BUSINESS CONFIG ====================
 
 model BusinessConfig {
-  id              String   @id @default(cuid())
-  businessName    String
-  businessCode    String   @unique // POWER_BRICK or BAKE_LAND
-  gstNumber       String?
-  address         String?
-  phone           String?
-  email           String?
-  logo            String?
-  invoicePrefix   String?
-  invoiceCounter  Int      @default(0)
-  settings        String?  // JSON string for additional settings
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(cuid())
+  businessName   String
+  businessCode   String   @unique // POWER_BRICK or BAKE_LAND
+  gstNumber      String?
+  address        String?
+  phone          String?
+  email          String?
+  logo           String?
+  invoicePrefix  String?
+  invoiceCounter Int      @default(0)
+  settings       String? // JSON string for additional settings
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 // ==================== CUSTOMERS & SUPPLIERS ====================
 
 model Customer {
-  id          String   @id @default(cuid())
-  name        String
-  phone       String?
-  email       String?
-  address     String?
-  gstNumber   String?
-  business    String   @default("POWER_BRICK") // POWER_BRICK or BAKE_LAND
-  totalDue    Float    @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  gstNumber String?
+  business  String   @default("POWER_BRICK") // POWER_BRICK or BAKE_LAND
+  totalDue  Float    @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  invoices    Invoice[]
+  invoices Invoice[]
 }
 
 model Supplier {
-  id          String   @id @default(cuid())
-  name        String
-  phone       String?
-  email       String?
-  address     String?
-  gstNumber   String?
-  materials   String?  // JSON array of material types supplied
-  totalDue    Float    @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  business    String   @default("POWER_BRICK") // POWER_BRICK or BAKE_LAND
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  gstNumber String?
+  materials String? // JSON array of material types supplied
+  totalDue  Float    @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  business  String   @default("POWER_BRICK") // POWER_BRICK or BAKE_LAND
 
-  purchases   Purchase[]
+  purchases Purchase[]
 }
 
 // ==================== MATERIALS & STOCK ====================
 
 model Material {
-  id            String   @id @default(cuid())
-  name          String
-  code          String   @unique
-  unit          String   // pieces, kg, bags, cubic_feet, tons
-  category      String   @default("brick") // brick, aggregate, cement, other
-  defaultRate   Float    @default(0)
-  gstRate       Float    @default(0) // GST percentage
-  hsnCode       String?
-  isActive      Boolean  @default(true)
-  sortOrder     Int      @default(0)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  unit        String // pieces, kg, bags, cubic_feet, tons
+  category    String   @default("brick") // brick, aggregate, cement, other
+  defaultRate Float    @default(0)
+  gstRate     Float    @default(0) // GST percentage
+  hsnCode     String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  stock         Stock?
+  stock          Stock?
   stockMovements StockMovement[]
-  invoiceItems  InvoiceItem[]
-  purchaseItems PurchaseItem[]
+  invoiceItems   InvoiceItem[]
+  purchaseItems  PurchaseItem[]
   loadingCharges LoadingCharge[]
 }
 
@@ -140,97 +142,102 @@ model Stock {
 }
 
 model StockMovement {
-  id          String   @id @default(cuid())
-  materialId  String
-  material    Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
-  type        String   // IN, OUT, ADJUSTMENT, WASTAGE
-  quantity    Float
-  reference   String?  // invoice ID or purchase ID
+  id            String   @id @default(cuid())
+  materialId    String
+  material      Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  type          String // IN, OUT, ADJUSTMENT, WASTAGE
+  quantity      Float
+  reference     String? // invoice ID or purchase ID
   referenceType String? // SALE, PURCHASE, ADJUSTMENT, WASTAGE
-  notes       String?
-  createdAt   DateTime @default(now())
+  notes         String?
+  createdAt     DateTime @default(now())
 }
 
 // ==================== PURCHASES ====================
 
 model Purchase {
-  id              String   @id @default(cuid())
-  purchaseNumber  String   @unique
-  supplierId      String
-  supplier        Supplier @relation(fields: [supplierId], references: [id])
-  totalAmount     Float    @default(0)
-  transportCost   Float    @default(0)
-  loadingCost     Float    @default(0)
-  otherCharges    Float    @default(0)
-  grandTotal      Float    @default(0)
-  paidAmount      Float    @default(0)
-  dueAmount       Float    @default(0)
-  paymentStatus   String   @default("pending") // pending, partial, paid
-  paymentMethod   String?  // cash, upi, bank_transfer, cheque
-  notes           String?
-  purchaseDate    DateTime @default(now())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  business        String   @default("POWER_BRICK") // POWER_BRICK or BAKE_LAND
+  id             String   @id @default(cuid())
+  purchaseNumber String   @unique
+  supplierId     String
+  supplier       Supplier @relation(fields: [supplierId], references: [id])
+  totalAmount    Float    @default(0)
+  transportCost  Float    @default(0)
+  loadingCost    Float    @default(0)
+  otherCharges   Float    @default(0)
+  grandTotal     Float    @default(0)
+  paidAmount     Float    @default(0)
+  dueAmount      Float    @default(0)
+  paymentStatus  String   @default("pending") // pending, partial, paid
+  paymentMethod  String? // cash, upi, bank_transfer, cheque
+  notes          String?
+  purchaseDate   DateTime @default(now())
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  business       String   @default("POWER_BRICK") // POWER_BRICK or BAKE_LAND
 
-  items           PurchaseItem[]
+  items PurchaseItem[]
+
+  @@index([supplierId])
 }
 
 model PurchaseItem {
-  id          String   @id @default(cuid())
-  purchaseId  String
-  purchase    Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
-  materialId  String?
-  material    Material? @relation(fields: [materialId], references: [id])
+  id              String         @id @default(cuid())
+  purchaseId      String
+  purchase        Purchase       @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  materialId      String?
+  material        Material?      @relation(fields: [materialId], references: [id])
   bakeryProductId String?
   bakeryProduct   BakeryProduct? @relation(fields: [bakeryProductId], references: [id])
-  quantity    Float
-  rate        Float
-  amount      Float
+  quantity        Float
+  rate            Float
+  amount          Float
 }
 
 // ==================== INVOICES & BILLING ====================
 
 model Invoice {
-  id              String   @id @default(cuid())
-  invoiceNumber   String   @unique
-  business        String   @default("POWER_BRICK")
-  customerId      String
-  customer        Customer @relation(fields: [customerId], references: [id])
-  createdById     String
-  createdBy       User     @relation(fields: [createdById], references: [id])
-  
-  // Billing details
-  isGst           Boolean  @default(false)
-  subtotal        Float    @default(0)
-  gstAmount       Float    @default(0)
-  discountAmount  Float    @default(0)
-  discountPercent Float    @default(0)
-  loadingCharge   Float    @default(0)
-  transportCharge Float    @default(0)
-  tractorCharge   Float    @default(0)
-  labourCharge    Float    @default(0)
-  loadingWorkerIds String?
-  grandTotal      Float    @default(0)
-  
-  // Payment
-  paidAmount      Float    @default(0)
-  dueAmount       Float    @default(0)
-  paymentStatus   String   @default("pending") // pending, partial, paid
-  paymentMethod   String?  // cash, upi, card, bank_transfer, cheque
-  
-  // Vehicle & transport
-  vehicleNumber   String?
-  driverName      String?
-  
-  notes           String?
-  invoiceDate     DateTime @default(now())
-  dueDate         DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id            String   @id @default(cuid())
+  invoiceNumber String   @unique
+  business      String   @default("POWER_BRICK")
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id])
+  createdById   String
+  createdBy     User     @relation(fields: [createdById], references: [id])
 
-  items           InvoiceItem[]
-  payments        Payment[]
+  // Billing details
+  isGst            Boolean @default(false)
+  subtotal         Float   @default(0)
+  gstAmount        Float   @default(0)
+  discountAmount   Float   @default(0)
+  discountPercent  Float   @default(0)
+  loadingCharge    Float   @default(0)
+  transportCharge  Float   @default(0)
+  tractorCharge    Float   @default(0)
+  labourCharge     Float   @default(0)
+  loadingWorkerIds String?
+  grandTotal       Float   @default(0)
+
+  // Payment
+  paidAmount    Float   @default(0)
+  dueAmount     Float   @default(0)
+  paymentStatus String  @default("pending") // pending, partial, paid
+  paymentMethod String? // cash, upi, card, bank_transfer, cheque
+
+  // Vehicle & transport
+  vehicleNumber String?
+  driverName    String?
+
+  notes       String?
+  invoiceDate DateTime  @default(now())
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  items    InvoiceItem[]
+  payments Payment[]
+
+  @@index([customerId])
+  @@index([createdById])
 }
 
 model InvoiceItem {
@@ -245,70 +252,74 @@ model InvoiceItem {
   gstRate     Float    @default(0)
   gstAmount   Float    @default(0)
   amount      Float
+
+  @@index([invoiceId])
+  @@index([materialId])
 }
 
 model Payment {
-  id          String   @id @default(cuid())
-  invoiceId   String
-  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  amount      Float
-  method      String   // cash, upi, card, bank_transfer, cheque
-  reference   String?  // transaction ID
-  notes       String?
-  paidAt      DateTime @default(now())
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  invoiceId String
+  invoice   Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount    Float
+  method    String // cash, upi, card, bank_transfer, cheque
+  reference String? // transaction ID
+  notes     String?
+  paidAt    DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 // ==================== WORKERS ====================
 
 model Worker {
-  id              String   @id @default(cuid())
-  name            String
-  phone           String?
-  address         String?
-  business        String   @default("POWER_BRICK") // POWER_BRICK or BAKE_LAND
-  ratePerPunch    Float    @default(0)
-  joiningDate     DateTime @default(now())
-  isActive        Boolean  @default(true)
-  totalEarned     Float    @default(0)
-  totalPaid       Float    @default(0)
-  pendingSalary   Float    @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id            String   @id @default(cuid())
+  name          String
+  phone         String?
+  address       String?
+  business      String   @default("POWER_BRICK") // POWER_BRICK or BAKE_LAND
+  ratePerPunch  Float    @default(0)
+  joiningDate   DateTime @default(now())
+  isActive      Boolean  @default(true)
+  totalEarned   Float    @default(0)
+  totalPaid     Float    @default(0)
+  pendingSalary Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  attendance      WorkerAttendance[]
-  payments        WorkerPayment[]
+  attendance WorkerAttendance[]
+  payments   WorkerPayment[]
 }
 
 model WorkerAttendance {
-  id          String   @id @default(cuid())
-  workerId    String
-  worker      Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
-  date        DateTime
-  isPresent   Boolean  @default(true)
-  punchCount  Int      @default(0)
-  rate        Float    @default(0)
-  dailyEarning Float   @default(0)
-  overtime    Float    @default(0)
-  punchType   String?  // "4_inch" or "6_inch"
-  bricksProduced Int?  @default(0)
-  notes       String?
-  createdAt   DateTime @default(now())
+  id             String   @id @default(cuid())
+  workerId       String
+  worker         Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  date           DateTime
+  isPresent      Boolean  @default(true)
+  punchCount     Int      @default(0)
+  rate           Float    @default(0)
+  dailyEarning   Float    @default(0)
+  overtime       Float    @default(0)
+  punchType      String? // "4_inch" or "6_inch"
+  bricksProduced Int?     @default(0)
+  notes          String?
+  createdAt      DateTime @default(now())
 
   @@unique([workerId, date])
+  @@index([workerId])
 }
 
 model WorkerPayment {
-  id          String   @id @default(cuid())
-  workerId    String
-  worker      Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
-  amount      Float
-  type        String   @default("salary") // salary, advance, bonus, deduction
-  method      String?  // cash, upi, bank_transfer
-  period      String?  // e.g., "2026-W19", "2026-05"
-  notes       String?
-  paidAt      DateTime @default(now())
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  workerId  String
+  worker    Worker   @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  amount    Float
+  type      String   @default("salary") // salary, advance, bonus, deduction
+  method    String? // cash, upi, bank_transfer
+  period    String? // e.g., "2026-W19", "2026-05"
+  notes     String?
+  paidAt    DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 // ==================== LOADING CHARGES ====================
@@ -318,7 +329,7 @@ model LoadingCharge {
   materialId  String
   material    Material @relation(fields: [materialId], references: [id])
   rate        Float    @default(0)
-  unit        String   // per_piece, per_ton, per_bag, per_trip
+  unit        String // per_piece, per_ton, per_bag, per_trip
   description String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -328,102 +339,102 @@ model LoadingCharge {
 // ==================== TRANSPORT ====================
 
 model Transport {
-  id              String   @id @default(cuid())
-  vehicleNumber   String?
-  vehicleType     String?  // tractor, truck, pickup, other
-  driverName      String?
-  driverPhone     String?
-  fromLocation    String?
-  toLocation      String?
-  purpose         String?  // delivery, pickup, transfer
-  charge          Float    @default(0)
-  dieselCost      Float    @default(0)
-  otherExpenses   Float    @default(0)
-  totalCost       Float    @default(0)
-  invoiceRef      String?
-  customerName    String?
-  notes           String?
-  tripDate        DateTime @default(now())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id            String   @id @default(cuid())
+  vehicleNumber String?
+  vehicleType   String? // tractor, truck, pickup, other
+  driverName    String?
+  driverPhone   String?
+  fromLocation  String?
+  toLocation    String?
+  purpose       String? // delivery, pickup, transfer
+  charge        Float    @default(0)
+  dieselCost    Float    @default(0)
+  otherExpenses Float    @default(0)
+  totalCost     Float    @default(0)
+  invoiceRef    String?
+  customerName  String?
+  notes         String?
+  tripDate      DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 // ==================== BAKERY ====================
 
 model BakeryProduct {
-  id          String   @id @default(cuid())
-  name        String
-  category    String?  // bread, cake, pastry, snack, other
-  unit        String   @default("pieces") // pieces, kg, packets
-  costPrice   Float    @default(0)
-  sellPrice   Float    @default(0)
-  stock       Float    @default(0)
-  minStock    Float    @default(0)
-  expiryDays  Int?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id         String   @id @default(cuid())
+  name       String
+  category   String? // bread, cake, pastry, snack, other
+  unit       String   @default("pieces") // pieces, kg, packets
+  costPrice  Float    @default(0)
+  sellPrice  Float    @default(0)
+  stock      Float    @default(0)
+  minStock   Float    @default(0)
+  expiryDays Int?
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  sales       BakerySaleItem[]
-  purchases   PurchaseItem[]
+  sales     BakerySaleItem[]
+  purchases PurchaseItem[]
 }
 
 model BakerySale {
-  id              String   @id @default(cuid())
-  saleDate        DateTime @default(now())
-  totalAmount     Float    @default(0)
-  cashAmount      Float    @default(0)
-  upiAmount       Float    @default(0)
-  cardAmount      Float    @default(0)
-  discountAmount  Float    @default(0)
-  notes           String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(cuid())
+  saleDate       DateTime @default(now())
+  totalAmount    Float    @default(0)
+  cashAmount     Float    @default(0)
+  upiAmount      Float    @default(0)
+  cardAmount     Float    @default(0)
+  discountAmount Float    @default(0)
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  items           BakerySaleItem[]
+  items BakerySaleItem[]
 }
 
 model BakerySaleItem {
-  id          String       @id @default(cuid())
-  saleId      String
-  sale        BakerySale   @relation(fields: [saleId], references: [id], onDelete: Cascade)
-  productId   String
-  product     BakeryProduct @relation(fields: [productId], references: [id])
-  quantity    Float
-  rate        Float
-  amount      Float
+  id        String        @id @default(cuid())
+  saleId    String
+  sale      BakerySale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  productId String
+  product   BakeryProduct @relation(fields: [productId], references: [id])
+  quantity  Float
+  rate      Float
+  amount    Float
 }
 
 // ==================== EXPENSES ====================
 
 model Expense {
-  id          String   @id @default(cuid())
-  category    String   // electricity, home, water, personal, maintenance, bakery, power_brick, miscellaneous, unknown
-  subCategory String?  // power_brick_electricity, bake_land_electricity, house_electricity
-  business    String?  // POWER_BRICK, BAKE_LAND, HOME
-  title       String
-  amount      Float
-  description String?
-  billNumber  String?
+  id            String    @id @default(cuid())
+  category      String // electricity, home, water, personal, maintenance, bakery, power_brick, miscellaneous, unknown
+  subCategory   String? // power_brick_electricity, bake_land_electricity, house_electricity
+  business      String? // POWER_BRICK, BAKE_LAND, HOME
+  title         String
+  amount        Float
+  description   String?
+  billNumber    String?
   paymentMethod String? // cash, upi, bank_transfer, card
-  isPaid      Boolean  @default(true)
-  dueDate     DateTime?
-  paidDate    DateTime?
-  month       String?  // e.g., "2026-05"
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isPaid        Boolean   @default(true)
+  dueDate       DateTime?
+  paidDate      DateTime?
+  month         String? // e.g., "2026-05"
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 // ==================== AI REPORTS ====================
 
 model AIReport {
   id          String   @id @default(cuid())
-  type        String   // weekly, monthly, custom
-  business    String?  // POWER_BRICK, BAKE_LAND, ALL
+  type        String // weekly, monthly, custom
+  business    String? // POWER_BRICK, BAKE_LAND, ALL
   title       String
-  content     String   // JSON or markdown content
+  content     String // JSON or markdown content
   summary     String?
-  period      String?  // e.g., "2026-W19", "2026-05"
+  period      String? // e.g., "2026-W19", "2026-05"
   generatedAt DateTime @default(now())
   createdAt   DateTime @default(now())
 }
@@ -441,21 +452,23 @@ model Booking {
   amountPaid    Float
   paymentStatus String   @default("pending") // pending, completed, failed
   bookingDate   DateTime @default(now())
-  
-  userId        String?
-  user          User?    @relation(fields: [userId], references: [id])
-  
-  receipt       Receipt?
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  receipt Receipt?
+
+  @@index([userId])
 }
 
 model Receipt {
-  id            String   @id @default(cuid())
-  bookingId     String   @unique
-  booking       Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  pdfUrl        String?
-  whatsappSent  Boolean  @default(false)
-  sentAt        DateTime?
-  deliveryStatus String  @default("pending") // pending, sent, failed
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             String    @id @default(cuid())
+  bookingId      String    @unique
+  booking        Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  pdfUrl         String?
+  whatsappSent   Boolean   @default(false)
+  sentAt         DateTime?
+  deliveryStatus String    @default("pending") // pending, sent, failed
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }

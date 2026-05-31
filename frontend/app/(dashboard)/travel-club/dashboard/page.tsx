@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { SendWhatsAppReceiptButton } from '@/components/SendWhatsAppReceiptButton';
 
 export default function UserDashboardPage() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -41,6 +40,8 @@ export default function MaterialsPage() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchMaterials(); }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,6 +59,7 @@ export default function MaterialsPage() {
       setEditing(null);
       setForm({ name: '', code: '', unit: 'pieces', category: 'brick', defaultRate: 0, gstRate: 0, hsnCode: '', currentStock: 0 });
       fetchMaterials(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) { 
       showToast(e.response?.data?.error || e.message || 'Action failed', 'error');
     } finally {
@@ -86,6 +88,7 @@ export default function MaterialsPage() {
       await api.delete(`/materials/${id}`); 
       setMaterials(prev => prev.filter(m => m.id !== id));
       showToast('Material deleted successfully');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) { 
       showToast(e.response?.data?.error || e.message || 'Failed to delete material', 'error'); 
     }

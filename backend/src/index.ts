@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import prisma from './utils/prisma';
 
@@ -8,9 +10,21 @@ dotenv.config();
 const app = express();
 const PORT = parseInt(process.env.PORT || '10000', 10);
 
-// Middleware - Allow all origins for free-tier compatibility
+// Security Middleware
+app.use(helmet());
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // Limit each IP to 1000 requests per `window` (here, per 15 minutes)
+  standardHeaders: true, 
+  legacyHeaders: false, 
+});
+app.use('/api', limiter);
+
+// CORS Config
+const allowedOrigins = process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : true;
 app.use(cors({
-  origin: true,
+  origin: allowedOrigins,
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));

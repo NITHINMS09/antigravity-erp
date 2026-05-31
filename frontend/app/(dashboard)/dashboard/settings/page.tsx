@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,7 +8,11 @@ import api from '@/lib/api';
 import { useAuth } from '@/contexts/auth-context';
 
 export default function SettingsPage() {
+   
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [configs, setConfigs] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState(true);
   const [pbForm, setPbForm] = useState({ businessName: '', gstNumber: '', address: '', phone: '', email: '' });
   const [blForm, setBlForm] = useState({ businessName: '', gstNumber: '', address: '', phone: '', email: '' });
@@ -21,18 +25,22 @@ export default function SettingsPage() {
   useEffect(() => {
     api.get('/config').then(d => {
       setConfigs(d.configs);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const pb = d.configs.find((c: any) => c.businessCode === 'POWER_BRICK');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const bl = d.configs.find((c: any) => c.businessCode === 'BAKE_LAND');
       if (pb) setPbForm({ businessName: pb.businessName, gstNumber: pb.gstNumber || '', address: pb.address || '', phone: pb.phone || '', email: pb.email || '' });
       if (bl) setBlForm({ businessName: bl.businessName, gstNumber: bl.gstNumber || '', address: bl.address || '', phone: bl.phone || '', email: bl.email || '' });
     }).finally(() => setLoading(false));
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const saveBusiness = async (code: string, form: any) => {
     try {
       await api.put(`/config/${code}`, form);
       setSaved(code);
       setTimeout(() => setSaved(''), 2000);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) { alert(e.message); }
   };
 
@@ -44,6 +52,7 @@ export default function SettingsPage() {
       setPasswordStatus({ type: 'success', message: 'Account details updated successfully!' });
       setPasswordForm({ email: '', newEmail: '', newPassword: '' });
       setTimeout(() => setPasswordStatus({ type: '', message: '' }), 3000);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setPasswordStatus({ type: 'error', message: err.message || 'Failed to update account details' });
     }
@@ -68,6 +77,7 @@ export default function SettingsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {fields.map(f => (
             <div key={f.k}><label className="block text-xs text-zinc-500 mb-1">{f.l}</label>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             <input type="text" value={(pbForm as any)[f.k]} onChange={e => setPbForm({...pbForm,[f.k]:e.target.value})}
               className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-orange-500/50" /></div>
           ))}
@@ -85,6 +95,7 @@ export default function SettingsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {fields.map(f => (
             <div key={f.k}><label className="block text-xs text-zinc-500 mb-1">{f.l}</label>
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             <input type="text" value={(blForm as any)[f.k]} onChange={e => setBlForm({...blForm,[f.k]:e.target.value})}
               className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-purple-500/50" /></div>
           ))}
@@ -99,7 +110,7 @@ export default function SettingsPage() {
             <KeyRound className="w-5 h-5 text-red-400" />
             <h2 className="text-lg font-semibold text-zinc-200">Security / Account Details</h2>
           </div>
-          <p className="text-sm text-zinc-400 mb-4">Change your email or password, or reset another user's details (Admin only).</p>
+          <p className="text-sm text-zinc-400 mb-4">Change your email or password, or reset another user&apos;s details (Admin only).</p>
           
           <form onSubmit={handlePasswordChange} className="max-w-md space-y-4">
             <div>

@@ -7,9 +7,9 @@ export function proxy(request: NextRequest) {
     // In a real app, we should check if the JWT token is valid here or via a cookie.
     // Since localStorage is not accessible in edge middleware, and if we're not using cookies,
     // we have to rely on a client-side check or a cookie.
-    // For now, let's just let it pass and let the layout/client handle the redirect if localStorage doesn't exist,
+    // For now, let's just let it pass and let the layout/client handle the redirect if localStorage doesn&apos;t exist,
     // OR we can check for a cookie if we set one on login.
-    // Let's assume the auth context already handles redirection to /login if no token is in localStorage.
+    // Let&apos;s assume the auth context already handles redirection to /login if no token is in localStorage.
   }
 
   return NextResponse.next();

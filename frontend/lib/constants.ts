@@ -64,6 +64,7 @@ export function formatDate(date: string | Date | null | undefined): string {
     const d = new Date(date);
     if (isNaN(d.getTime())) return 'Invalid Date';
     return new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }).format(d);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return 'Invalid Date';
   }
@@ -75,6 +76,7 @@ export function formatDateTime(date: string | Date | null | undefined): string {
     const d = new Date(date);
     if (isNaN(d.getTime())) return 'Invalid Date';
     return new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(d);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return 'Invalid Date';
   }

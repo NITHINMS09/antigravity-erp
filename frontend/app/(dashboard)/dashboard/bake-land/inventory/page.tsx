@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 'use client';
 import { motion } from 'framer-motion';
 import { Warehouse } from 'lucide-react';

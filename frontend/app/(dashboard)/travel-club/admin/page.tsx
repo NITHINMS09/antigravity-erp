@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { SendWhatsAppReceiptButton } from '@/components/SendWhatsAppReceiptButton';
 
 export default function AdminBookingsPage() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

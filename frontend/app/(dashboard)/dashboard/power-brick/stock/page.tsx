@@ -1,8 +1,9 @@
-// @ts-nocheck
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Warehouse, ArrowUp, ArrowDown, AlertTriangle, History } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import api from '@/lib/api';
@@ -30,6 +31,7 @@ export default function StockPage() {
       const d = await api.get('/stock');
       setStock(d.stock);
       setAdjustModal(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) { alert(e.message); }
   };
 

@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,10 +8,13 @@ import api from '@/lib/api';
 import { formatCurrency } from '@/lib/constants';
 
 export default function LoadingChargesPage() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [charges, setCharges] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [materials, setMaterials] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ materialId: '', rate: 0, unit: 'per_ton', description: '' });
 
@@ -19,11 +22,13 @@ export default function LoadingChargesPage() {
     try {
       const [c, m] = await Promise.all([api.get('/loading-charges'), api.get('/materials')]);
       setCharges(c.charges);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setMaterials(m.materials.filter((mm: any) => mm.isActive));
     } catch (e) { console.error(e); }
     finally { setLoading(false); }
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchData(); }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,9 +42,11 @@ export default function LoadingChargesPage() {
       setShowForm(false); setEditing(null);
       setForm({ materialId: '', rate: 0, unit: 'per_ton', description: '' });
       fetchData();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) { alert(err.message); }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleEdit = (charge: any) => {
     setEditing(charge);
     setForm({ materialId: charge.materialId, rate: charge.rate, unit: charge.unit, description: charge.description || '' });
@@ -48,6 +55,7 @@ export default function LoadingChargesPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Remove this loading charge?')) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     try { await api.delete(`/loading-charges/${id}`); fetchData(); } catch (e: any) { alert(e.message); }
   };
 

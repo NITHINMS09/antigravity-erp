@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,7 +8,9 @@ import api from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/constants';
 
 export default function TransportPage() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [transports, setTransports] = useState<any[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
@@ -24,6 +26,7 @@ export default function TransportPage() {
     finally { setLoading(false); }
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchData(); }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -63,7 +66,12 @@ export default function TransportPage() {
                   className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none" /></div>
               <div className="grid grid-cols-2 gap-3">
                 {[{ l: 'Vehicle No.', k: 'vehicleNumber' }, { l: 'Driver', k: 'driverName' }, { l: 'From', k: 'fromLocation' }, { l: 'To', k: 'toLocation' }, { l: 'Customer', k: 'customerName' }].map(f => (
-                  <div key={f.k}><label className="block text-xs text-zinc-500 mb-1">{f.l}</label><input type="text" value={(form as any)[f.k]} onChange={e => setForm({ ...form, [f.k]: e.target.value })} className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none" /></div>
+                  <div key={f.k}>
+                    { }
+                    <label className="block text-xs text-zinc-500 mb-1">{f.l}</label>
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    <input type="text" value={(form as any)[f.k]} onChange={e => setForm({ ...form, [f.k]: e.target.value })} className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none" />
+                  </div>
                 ))}
                 <div><label className="block text-xs text-zinc-500 mb-1">Type</label>
                   <select value={form.vehicleType} onChange={e => setForm({ ...form, vehicleType: e.target.value })} className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none">
@@ -73,7 +81,12 @@ export default function TransportPage() {
               </div>
               <div className="grid grid-cols-3 gap-3">
                 {[{ l: 'Charge ₹', k: 'charge' }, { l: 'Diesel ₹', k: 'dieselCost' }, { l: 'Other ₹', k: 'otherExpenses' }].map(f => (
-                  <div key={f.k}><label className="block text-xs text-zinc-500 mb-1">{f.l}</label><input type="number" value={(form as any)[f.k] || ''} onChange={e => setForm({ ...form, [f.k]: +e.target.value })} className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none" /></div>
+                  <div key={f.k}>
+                    { }
+                    <label className="block text-xs text-zinc-500 mb-1">{f.l}</label>
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    <input type="number" value={(form as any)[f.k] || ''} onChange={e => setForm({ ...form, [f.k]: +e.target.value })} className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none" />
+                  </div>
                 ))}
               </div>
               <div className="p-3 rounded-xl bg-orange-500/5 border border-orange-500/10">

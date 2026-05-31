@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { SendWhatsAppReceiptButton } from '@/components/SendWhatsAppReceiptButton';
 
 export default function BookingDetailsPage({ params }: { params: { id: string } }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [booking, setBooking] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 

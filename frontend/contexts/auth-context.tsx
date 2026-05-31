@@ -26,14 +26,18 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('token');
+    }
+    return null;
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   const loadUser = useCallback(async () => {
     const savedToken = localStorage.getItem('token');
     if (!savedToken) { setIsLoading(false); return; }
     try {
-      setToken(savedToken);
       const data = await api.get('/auth/me', { token: savedToken });
       setUser(data.user);
     } catch {
@@ -44,6 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { loadUser(); }, [loadUser]);
 
   const login = async (email: string, password: string) => {

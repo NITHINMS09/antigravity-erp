@@ -4,9 +4,10 @@ import prisma from '../utils/prisma';
 import { authenticate } from '../middleware/auth';
 
 const router = Router();
+import { cacheMiddleware } from '../utils/cache';
 
 // GET /api/dashboard
-router.get('/', authenticate, async (_req: Request, res: Response) => {
+router.get('/', authenticate, cacheMiddleware(60), async (_req: Request, res: Response) => {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);

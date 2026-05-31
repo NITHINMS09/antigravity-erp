@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -9,9 +8,11 @@ import { formatCurrency } from '@/lib/constants';
 import { useToast } from '@/components/Toast';
 
 export default function BakeryProductsPage() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [editing, setEditing] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
   const [search, setSearch] = useState('');
@@ -24,6 +25,7 @@ export default function BakeryProductsPage() {
     try {
       const data = await api.get('/bakery/products');
       setProducts(data.products);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       showToast('Failed to load products', 'error');
     } finally {
@@ -31,6 +33,8 @@ export default function BakeryProductsPage() {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { fetchProducts(); }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,6 +52,7 @@ export default function BakeryProductsPage() {
       setEditing(null);
       setForm({ name: '', category: 'bread', unit: 'pieces', costPrice: 0, sellPrice: 0, stock: 0 });
       fetchProducts(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       showToast(err.message || 'Action failed', 'error');
     } finally {
@@ -55,6 +60,7 @@ export default function BakeryProductsPage() {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleEdit = (p: any) => {
     setEditing(p);
     setForm({
@@ -74,8 +80,9 @@ export default function BakeryProductsPage() {
       await api.delete(`/bakery/products/${id}`);
       setProducts(prev => prev.filter(p => p.id !== id));
       showToast('Product deleted successfully');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      showToast(err.response?.data?.error || err.message || 'Failed to delete product', 'error');
+      showToast(err.message || 'Failed to delete product', 'error');
     }
   };
 

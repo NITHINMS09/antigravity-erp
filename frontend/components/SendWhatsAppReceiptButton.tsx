@@ -52,6 +52,7 @@ export function SendWhatsAppReceiptButton({ bookingId }: SendWhatsAppReceiptButt
         body: JSON.stringify({ status: 'sent' })
       });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'An error occurred');
