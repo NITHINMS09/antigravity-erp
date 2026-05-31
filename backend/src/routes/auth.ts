@@ -29,7 +29,7 @@ router.post('/register', async (req: Request, res: Response) => {
         email,
         password: hashedPassword,
         name,
-        phone,
+        phone: phone ? phone : null,
         role: role || 'staff',
       },
     });
@@ -59,6 +59,10 @@ router.post('/register', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Register error:', error);
+    if (error.code === 'P2002' && error.meta?.target?.includes('phone')) {
+      res.status(409).json({ error: 'Phone number already registered.' });
+      return;
+    }
     res.status(500).json({ error: 'Registration failed.' });
   }
 });
