@@ -11,7 +11,9 @@ const app = express();
 const PORT = parseInt(process.env.PORT || '10000', 10);
 
 // Security Middleware
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: false, // Allow cross-origin requests from frontend
+}));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -22,7 +24,7 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 // CORS Config
-const allowedOrigins = process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : true;
+const allowedOrigins = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',').map(u => u.trim()) : true;
 app.use(cors({
   origin: allowedOrigins,
   credentials: true
