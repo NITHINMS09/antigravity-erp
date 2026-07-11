@@ -1,21 +1,32 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { SendWhatsAppReceiptButton } from '@/components/SendWhatsAppReceiptButton';
+import api from '@/lib/api';
 
-export default function BookingDetailsPage({ params }: { params: { id: string } }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [booking, setBooking] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+interface TravelBooking {
+  id: string;
+  bookingId: string;
+  customerName: string;
+  tourName: string;
+  travelDate: string;
+  seats: number;
+  amountPaid: number;
+}
+
+export default function BookingDetailsPage() {
+  const params = useParams<{ id: string }>();
+  const bookingId = Array.isArray(params.id) ? params.id[0] : params.id;
+  const [booking, setBooking] = useState<TravelBooking | null>(null);
+  const [loading, setLoading] = useState(!!bookingId);
 
   useEffect(() => {
+    if (!bookingId) return;
+
     const fetchBooking = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`http://localhost:10000/api/bookings/${params.id}`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
+        const data = await api.get<{ booking?: TravelBooking }>(`/bookings/${bookingId}`);
         if (data.booking) setBooking(data.booking);
       } catch (e) {
         console.error(e);
@@ -24,7 +35,7 @@ export default function BookingDetailsPage({ params }: { params: { id: string } 
       }
     };
     fetchBooking();
-  }, [params.id]);
+  }, [bookingId]);
 
   if (loading) return <div className="p-8">Loading booking details...</div>;
   if (!booking) return <div className="p-8 text-red-500">Booking not found.</div>;

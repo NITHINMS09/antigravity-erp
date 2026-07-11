@@ -1,144 +1,197 @@
 import { Router, Request, Response } from 'express';
+import { z } from 'zod';
 import prisma from '../utils/prisma';
 import { authenticate } from '../middleware/auth';
 import { generateReceiptPDF } from '../utils/pdfGenerator';
 
 const router = Router();
+const adminRoles = new Set(['super_admin', 'manager']);
 
-// Create a booking
+const createBookingSchema = z.object({
+  customerName: z.string().trim().min(2, 'Customer name is required.'),
+  phone: z
+    .string()
+    .trim()
+    .min(7, 'Phone number must be at least 7 digits long.')
+    .max(20, 'Phone number is too long.'),
+  tourName: z.string().trim().min(2, 'Tour name is required.'),
+  travelDate: z.coerce.date(),
+  seats: z.coerce.number().int().positive('Seats must be greater than 0.'),
+  amountPaid: z.coerce.number().nonnegative('Amount paid cannot be negative.'),
+  paymentStatus: z.enum(['pending', 'completed', 'failed']).optional(),
+});
+
+function canManageAllBookings(role?: string): boolean {
+  return role ? adminRoles.has(role) : false;
+}
+
+function bookingAccessWhere(req: Request, bookingId?: string) {
+  if (canManageAllBookings(req.user?.role)) {
+    return bookingId ? { id: bookingId } : {};
+  }
+
+  return bookingId
+    ? { id: bookingId, userId: req.user?.userId }
+    : { userId: req.user?.userId };
+}
+
 router.post('/', authenticate, async (req: Request, res: Response) => {
   try {
-    const { customerName, phone, tourName, travelDate, seats, amountPaid, paymentStatus } = req.body;
-    
+    const payload = createBookingSchema.parse(req.body);
     const bookingId = `BKG-${Date.now().toString().slice(-6)}`;
-    
+
     const booking = await prisma.booking.create({
       data: {
         bookingId,
-        customerName,
-        phone,
-        tourName,
-        travelDate: new Date(travelDate),
-        seats: parseInt(seats),
-        amountPaid: parseFloat(amountPaid),
-        paymentStatus: paymentStatus || 'completed',
-        userId: req.user?.userId
-      }
+        customerName: payload.customerName,
+        phone: payload.phone,
+        tourName: payload.tourName,
+        travelDate: payload.travelDate,
+        seats: payload.seats,
+        amountPaid: payload.amountPaid,
+        paymentStatus: payload.paymentStatus ?? 'completed',
+        userId: req.user?.userId,
+      },
     });
 
     res.status(201).json({ booking });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: error.issues[0]?.message ?? 'Invalid booking data.' });
+      return;
+    }
+
     console.error('Create booking error:', error);
     res.status(500).json({ error: 'Failed to create booking' });
   }
 });
 
-// Get all bookings
 router.get('/', authenticate, async (req: Request, res: Response) => {
   try {
     const bookings = await prisma.booking.findMany({
+      where: bookingAccessWhere(req),
       include: {
-        receipt: true
+        receipt: true,
       },
-      orderBy: { bookingDate: 'desc' }
+      orderBy: { bookingDate: 'desc' },
     });
+
     res.json({ bookings });
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch bookings' });
   }
 });
 
-// Get booking by ID
 router.get('/:id', authenticate, async (req: Request, res: Response) => {
   try {
-    const booking = await prisma.booking.findUnique({
-      where: { id: req.params.id as string },
-      include: { receipt: true }
+    const booking = await prisma.booking.findFirst({
+      where: bookingAccessWhere(req, req.params.id as string),
+      include: { receipt: true },
     });
+
     if (!booking) {
-      return res.status(404).json({ error: 'Booking not found' });
+      res.status(404).json({ error: 'Booking not found' });
+      return;
     }
+
     res.json({ booking });
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch booking' });
   }
 });
 
-// Generate receipt
 router.post('/:id/receipt', authenticate, async (req: Request, res: Response) => {
   try {
-    const booking = await prisma.booking.findUnique({
-      where: { id: req.params.id as string },
-      include: { receipt: true }
+    const booking = await prisma.booking.findFirst({
+      where: bookingAccessWhere(req, req.params.id as string),
+      include: { receipt: true },
     });
 
     if (!booking) {
-      return res.status(404).json({ error: 'Booking not found' });
+      res.status(404).json({ error: 'Booking not found' });
+      return;
     }
 
-    let pdfUrl = (booking as any).receipt?.pdfUrl;
-    
-    // Generate new PDF if not exists
+    let pdfUrl = booking.receipt?.pdfUrl;
     if (!pdfUrl) {
       pdfUrl = await generateReceiptPDF(booking);
-      
-      if ((booking as any).receipt) {
+
+      if (booking.receipt) {
         await prisma.receipt.update({
-          where: { id: (booking as any).receipt.id },
-          data: { pdfUrl }
+          where: { id: booking.receipt.id },
+          data: { pdfUrl },
         });
       } else {
         await prisma.receipt.create({
           data: {
             bookingId: booking.id,
-            pdfUrl
-          }
+            pdfUrl,
+          },
         });
       }
     }
 
-    // Generate WhatsApp link and message
     const receiptLink = `${req.protocol}://${req.get('host') as string}${pdfUrl}`;
-    
-    const message = `🚌 Mysuru Travel Club\n\nBooking Confirmed ✅\n\nBooking ID: ${booking.bookingId}\nName: ${booking.customerName}\nTour: ${booking.tourName}\nTravel Date: ${booking.travelDate.toLocaleDateString()}\nSeats: ${booking.seats}\nAmount Paid: ₹${booking.amountPaid}\n\nYour booking has been successfully confirmed.\n\nReceipt:\n${receiptLink}\n\nThank you for choosing Mysuru Travel Club ❤️`;
-    
+    const message = [
+      'Mysuru Travel Club',
+      '',
+      'Booking Confirmed',
+      '',
+      `Booking ID: ${booking.bookingId}`,
+      `Name: ${booking.customerName}`,
+      `Tour: ${booking.tourName}`,
+      `Travel Date: ${booking.travelDate.toLocaleDateString()}`,
+      `Seats: ${booking.seats}`,
+      `Amount Paid: Rs ${booking.amountPaid}`,
+      '',
+      'Your booking has been successfully confirmed.',
+      '',
+      'Receipt:',
+      receiptLink,
+      '',
+      'Thank you for choosing Mysuru Travel Club.',
+    ].join('\n');
+
     const encodedMessage = encodeURIComponent(message);
-    const waLink = `https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}?text=${encodedMessage}`;
+    const whatsappLink = `https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}?text=${encodedMessage}`;
 
     res.json({
       success: true,
       pdfUrl,
-      whatsappLink: waLink
+      whatsappLink,
     });
-
   } catch (error) {
     console.error('Generate receipt error:', error);
     res.status(500).json({ error: 'Failed to generate receipt' });
   }
 });
 
-// Update WhatsApp delivery status
 router.post('/:id/whatsapp-status', authenticate, async (req: Request, res: Response) => {
   try {
-    const { status } = req.body; // 'sent', 'failed'
-    
-    const booking = await prisma.booking.findUnique({
-      where: { id: req.params.id as string },
-      include: { receipt: true }
+    const status = req.body?.status as string | undefined;
+    if (status !== 'sent' && status !== 'failed' && status !== 'pending') {
+      res.status(400).json({ error: 'Invalid WhatsApp status.' });
+      return;
+    }
+
+    const booking = await prisma.booking.findFirst({
+      where: bookingAccessWhere(req, req.params.id as string),
+      include: { receipt: true },
     });
 
     if (!booking) {
-      return res.status(404).json({ error: 'Booking not found' });
+      res.status(404).json({ error: 'Booking not found' });
+      return;
     }
 
-    if ((booking as any).receipt) {
+    if (booking.receipt) {
       await prisma.receipt.update({
-        where: { id: (booking as any).receipt.id },
+        where: { id: booking.receipt.id },
         data: {
           whatsappSent: status === 'sent',
           deliveryStatus: status,
-          sentAt: status === 'sent' ? new Date() : null
-        }
+          sentAt: status === 'sent' ? new Date() : null,
+        },
       });
     }
 
