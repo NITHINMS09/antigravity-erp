@@ -487,9 +487,7 @@ export default function WorkersPage() {
                                 fetchWorkers(true);
                               // eslint-disable-next-line @typescript-eslint/no-unused-vars
                               } catch(e) { showToast('Delete failed', 'error'); }
-                            }} className="p-1.5 rounded-lg hover:bg-red-500/10 text-zinc-600 hover:text-red-400 transition-colors">
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
+                            }} className="h-11 w-11 md:h-9 md:w-9 flex items-center justify-center rounded-xl hover:bg-red-500/10 text-zinc-600 hover:text-red-400 transition-all ml-auto"><Trash2 className="w-3.5 h-3.5" /></button>
                           </td>
                         </tr>
                       ))}
@@ -516,11 +514,11 @@ export default function WorkersPage() {
               <div className="w-12 h-12 rounded-2xl bg-purple-500/10 flex items-center justify-center">
                 <HardHat className="w-6 h-6 text-purple-400" />
               </div>
-              <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                 <button onClick={() => { setEditingWorker(w); setWorkerForm({ name: w.name, phone: w.phone || '', address: w.address || '', ratePerPunch: w.ratePerPunch, business: w.business }); setShowAddWorker(true); }}
-                  className="p-2 rounded-xl bg-white/5 hover:bg-blue-500/10 text-zinc-500 hover:text-blue-400 border border-transparent hover:border-blue-500/20 transition-all"><Pencil className="w-4 h-4" /></button>
+                  className="h-11 w-11 md:h-9 md:w-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-blue-500/10 text-zinc-500 hover:text-blue-400 border border-transparent hover:border-blue-500/20 transition-all"><Pencil className="w-4 h-4" /></button>
                 <button onClick={() => handleDeleteWorker(w.id, w.name)} 
-                  className="p-2 rounded-xl bg-white/5 hover:bg-red-500/10 text-zinc-500 hover:text-red-400 border border-transparent hover:border-red-500/20 transition-all"><Trash2 className="w-4 h-4" /></button>
+                  className="h-11 w-11 md:h-9 md:w-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-red-500/10 text-zinc-500 hover:text-red-400 border border-transparent hover:border-red-500/20 transition-all"><Trash2 className="w-4 h-4" /></button>
               </div>
             </div>
 

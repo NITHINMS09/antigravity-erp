@@ -123,9 +123,9 @@ export default function LoadingChargesPage() {
             className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 hover:border-amber-500/20 transition-all group">
             <div className="flex items-start justify-between mb-3">
               <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center"><BoltIcon className="w-5 h-5 text-amber-400" /></div>
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button onClick={() => handleEdit(c)} className="p-1.5 rounded-lg hover:bg-white/5 text-zinc-500 hover:text-blue-400"><Pencil className="w-3.5 h-3.5" /></button>
-                <button onClick={() => handleDelete(c.id)} className="p-1.5 rounded-lg hover:bg-white/5 text-zinc-500 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
+              <div className="flex gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                <button onClick={() => handleEdit(c)} className="h-11 w-11 md:h-9 md:w-9 flex items-center justify-center rounded-xl hover:bg-white/5 text-zinc-500 hover:text-blue-400 transition-all"><Pencil className="w-3.5 h-3.5" /></button>
+                <button onClick={() => handleDelete(c.id)} className="h-11 w-11 md:h-9 md:w-9 flex items-center justify-center rounded-xl hover:bg-white/5 text-zinc-500 hover:text-red-400 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
               </div>
             </div>
             <h3 className="text-sm font-semibold text-zinc-200">{c.material?.name} Loading</h3>

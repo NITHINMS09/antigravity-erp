@@ -503,13 +503,13 @@ export default function BillingPage() {
                         }`}>{inv.paymentStatus}</span>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex justify-end gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                           <Link href={`/print/invoice/${inv.id}`} target="_blank" 
-                            className="p-2.5 rounded-xl bg-white/5 hover:bg-orange-500/10 text-zinc-500 hover:text-orange-400 border border-transparent hover:border-orange-500/20 transition-all shadow-xl">
+                            className="h-11 w-11 md:h-9 md:w-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-orange-500/10 text-zinc-500 hover:text-orange-400 border border-transparent hover:border-orange-500/20 transition-all shadow-xl">
                             <Printer className="w-4 h-4" />
                           </Link>
                           <button onClick={() => handleDeleteInvoice(inv.id, inv.invoiceNumber)}
-                            className="p-2.5 rounded-xl bg-white/5 hover:bg-red-500/10 text-zinc-500 hover:text-red-400 border border-transparent hover:border-red-500/20 transition-all shadow-xl">
+                            className="h-11 w-11 md:h-9 md:w-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-red-500/10 text-zinc-500 hover:text-red-400 border border-transparent hover:border-red-500/20 transition-all shadow-xl">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>

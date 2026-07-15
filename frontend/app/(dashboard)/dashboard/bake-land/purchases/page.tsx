@@ -357,13 +357,13 @@ export default function BakeryPurchasesPage() {
                 <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest mb-1">Total Amount</p>
                 <p className="text-base font-black text-white tracking-tighter">{formatCurrency(p.grandTotal)}</p>
               </div>
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                 {p.paymentStatus !== 'paid' && (
                   <button onClick={() => { setShowPayment(p); setPayForm({ amount: p.dueAmount, method: 'cash', notes: '' }); }}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-emerald-500/10 text-zinc-500 hover:text-emerald-400 border border-transparent hover:border-emerald-500/20 shadow-xl"><IndianRupee className="w-4 h-4" /></button>
+                    className="h-11 w-11 md:h-9 md:w-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-emerald-500/10 text-zinc-500 hover:text-emerald-400 border border-transparent hover:border-emerald-500/20 shadow-xl"><IndianRupee className="w-4 h-4" /></button>
                 )}
                 <button onClick={() => handleDeletePurchase(p.id, p.purchaseNumber)}
-                  className="p-2 rounded-xl bg-white/5 hover:bg-red-500/10 text-zinc-500 hover:text-red-400 border border-transparent hover:border-red-500/20 shadow-xl"><Trash2 className="w-4 h-4" /></button>
+                  className="h-11 w-11 md:h-9 md:w-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-red-500/10 text-zinc-500 hover:text-red-400 border border-transparent hover:border-red-500/20 shadow-xl"><Trash2 className="w-4 h-4" /></button>
               </div>
             </div>
           </motion.div>

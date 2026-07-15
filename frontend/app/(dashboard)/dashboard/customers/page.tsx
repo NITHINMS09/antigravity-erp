@@ -197,9 +197,9 @@ export default function CustomersPage() {
                 <Users className="w-6 h-6 text-blue-400" />
               </div>
               <div className="flex flex-col items-end gap-2">
-                <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => handleEdit(c)} className="p-2 rounded-xl bg-white/5 hover:bg-blue-500/10 text-zinc-500 hover:text-blue-400 border border-transparent hover:border-blue-500/20"><Pencil className="w-4 h-4" /></button>
-                  <button onClick={() => handleDeleteCustomer(c.id, c.name)} className="p-2 rounded-xl bg-white/5 hover:bg-red-500/10 text-zinc-500 hover:text-red-400 border border-transparent hover:border-red-500/20"><Trash2 className="w-4 h-4" /></button>
+                <div className="flex gap-1.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => handleEdit(c)} className="h-11 w-11 md:h-9 md:w-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-blue-500/10 text-zinc-500 hover:text-blue-400 border border-transparent hover:border-blue-500/20 transition-all"><Pencil className="w-4 h-4" /></button>
+                  <button onClick={() => handleDeleteCustomer(c.id, c.name)} className="h-11 w-11 md:h-9 md:w-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-red-500/10 text-zinc-500 hover:text-red-400 border border-transparent hover:border-red-500/20 transition-all"><Trash2 className="w-4 h-4" /></button>
                 </div>
                 {c.totalDue > 0 && (
                   <span className="text-[10px] font-black bg-red-500/10 text-red-400 px-2.5 py-1 rounded-lg border border-red-500/10 shadow-lg shadow-red-500/5">
