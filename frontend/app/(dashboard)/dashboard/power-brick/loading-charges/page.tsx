@@ -73,7 +73,7 @@ export default function LoadingChargesPage() {
 
       {/* Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowForm(false)}>
+        <div className="fixed inset-0 z-50 flex items-start md:items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto" onClick={() => setShowForm(false)}>
           <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-md rounded-2xl border border-white/10 bg-[#0f0f1a] p-6" onClick={e => e.stopPropagation()}>
             <h2 className="text-lg font-semibold text-zinc-100 mb-4">{editing ? 'Edit Loading Charge' : 'Add Loading Charge'}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">

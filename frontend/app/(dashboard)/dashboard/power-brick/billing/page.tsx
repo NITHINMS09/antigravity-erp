@@ -8,6 +8,7 @@ import api from '@/lib/api';
 import { formatCurrency, formatDate, PAYMENT_METHODS } from '@/lib/constants';
 import Link from 'next/link';
 import { useToast } from '@/components/Toast';
+import { SendWhatsAppInvoiceButton } from '@/components/SendWhatsAppInvoiceButton';
 
 interface Material { id: string; name: string; code: string; unit: string; defaultRate: number; gstRate: number; stock?: { quantity: number }; }
 interface Customer { id: string; name: string; phone?: string; gstNumber?: string; }
@@ -187,6 +188,11 @@ export default function BillingPage() {
                   className="w-full py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-black uppercase tracking-widest text-[11px] flex items-center justify-center gap-2 hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg shadow-orange-500/25">
                   <Printer className="w-4 h-4" /> Print Invoice
                 </Link>
+                <SendWhatsAppInvoiceButton 
+                  invoiceId={successInvoice.id} 
+                  customerPhone={successInvoice.customer?.phone} 
+                  customerName={successInvoice.customer?.name}
+                />
                 <button onClick={() => { setSuccessInvoice(null); setTab('list'); }} 
                   className="w-full py-4 rounded-2xl bg-white/5 border border-white/10 text-zinc-400 font-black uppercase tracking-widest text-[11px] hover:bg-white/10 transition-all">
                   Return to History
@@ -483,9 +489,16 @@ export default function BillingPage() {
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
                           <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-tighter flex items-center gap-1"><Truck className="w-3 h-3" /> {inv.vehicleNumber || 'No Vehicle'}</span>
-                          <div className="flex gap-1 mt-1">
+                          <div className="flex gap-1 mt-1 flex-wrap">
                             {inv.isGst && <span className="text-[8px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.5 rounded-lg border border-emerald-500/10 font-black">GST</span>}
                             <span className="text-[8px] bg-white/5 text-zinc-600 px-1.5 py-0.5 rounded-lg font-black uppercase">{inv.paymentMethod}</span>
+                            <span className={`text-[8px] px-1.5 py-0.5 rounded-lg font-black uppercase border ${
+                              inv.whatsappSent 
+                                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/10' 
+                                : 'bg-zinc-500/10 text-zinc-500 border-zinc-500/10'
+                            }`}>
+                              WA: {inv.whatsappSent ? 'SENT' : 'NOT SENT'}
+                            </span>
                           </div>
                         </div>
                       </td>
@@ -508,6 +521,13 @@ export default function BillingPage() {
                             className="h-11 w-11 md:h-9 md:w-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-orange-500/10 text-zinc-500 hover:text-orange-400 border border-transparent hover:border-orange-500/20 transition-all shadow-xl">
                             <Printer className="w-4 h-4" />
                           </Link>
+                          <SendWhatsAppInvoiceButton 
+                            invoiceId={inv.id} 
+                            customerPhone={inv.customer?.phone} 
+                            customerName={inv.customer?.name}
+                            variant="icon"
+                            onStatusChange={() => fetchData(true)}
+                          />
                           <button onClick={() => handleDeleteInvoice(inv.id, inv.invoiceNumber)}
                             className="h-11 w-11 md:h-9 md:w-9 flex items-center justify-center rounded-xl bg-white/5 hover:bg-red-500/10 text-zinc-500 hover:text-red-400 border border-transparent hover:border-red-500/20 transition-all shadow-xl">
                             <Trash2 className="w-4 h-4" />

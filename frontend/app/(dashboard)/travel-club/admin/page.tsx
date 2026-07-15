@@ -2,20 +2,29 @@
 
 import React, { useEffect, useState } from 'react';
 import { SendWhatsAppReceiptButton } from '@/components/SendWhatsAppReceiptButton';
+import api, { getApiAssetUrl } from '@/lib/api';
+
+interface BookingReceipt {
+  pdfUrl?: string | null;
+  deliveryStatus: string;
+}
+
+interface TravelBooking {
+  id: string;
+  bookingId: string;
+  customerName: string;
+  phone: string;
+  receipt?: BookingReceipt | null;
+}
 
 export default function AdminBookingsPage() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [bookings, setBookings] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<TravelBooking[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchBookings = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`http://localhost:10000/api/bookings`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
+        const data = await api.get<{ bookings?: TravelBooking[] }>('/bookings');
         if (data.bookings) {
           setBookings(data.bookings);
         }
@@ -34,7 +43,7 @@ export default function AdminBookingsPage() {
     <div className="max-w-6xl mx-auto p-6 mt-6">
       <h1 className="text-3xl font-bold mb-6">Admin Panel - Mysuru Travel Club Receipts</h1>
       
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white rounded-lg shadow overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -57,7 +66,7 @@ export default function AdminBookingsPage() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {booking.receipt?.pdfUrl ? (
-                    <a href={`http://localhost:10000${booking.receipt.pdfUrl}`} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                    <a href={getApiAssetUrl(booking.receipt.pdfUrl)} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
                       Download PDF
                     </a>
                   ) : (

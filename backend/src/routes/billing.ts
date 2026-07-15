@@ -330,4 +330,79 @@ router.delete('/:id', authenticate, async (req: Request, res: Response) => {
   }
 });
 
+router.post('/:id/receipt', authenticate, async (req: Request, res: Response) => {
+  try {
+    const invoice = await prisma.invoice.findUnique({
+      where: { id: req.params.id as string },
+      include: { customer: true, items: { include: { material: true } } },
+    });
+
+    if (!invoice) {
+      res.status(404).json({ error: 'Invoice not found.' });
+      return;
+    }
+
+    let pdfUrl = invoice.pdfUrl;
+    if (!pdfUrl) {
+      const { generateInvoicePDF } = require('../utils/pdfGenerator');
+      pdfUrl = await generateInvoicePDF(invoice);
+
+      await prisma.invoice.update({
+        where: { id: invoice.id },
+        data: { pdfUrl },
+      });
+    }
+
+    const receiptLink = `${req.protocol}://${req.get('host') as string}${pdfUrl}`;
+    const customerPhone = invoice.customer?.phone || '';
+    
+    // Construct the WhatsApp message
+    const message = [
+      `Hello ${invoice.customer?.name || 'Customer'},`,
+      '',
+      'Thank you for your purchase from SK Groups.',
+      '',
+      'Please find your invoice attached:',
+      receiptLink,
+      '',
+      'For any queries, please contact us.',
+      '',
+      'Thank you,',
+      'SK Groups'
+    ].join('\n');
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappLink = `https://wa.me/${customerPhone.replace(/[^0-9]/g, '')}?text=${encodedMessage}`;
+
+    res.json({
+      success: true,
+      pdfUrl,
+      whatsappLink,
+    });
+  } catch (error) {
+    console.error('Generate invoice receipt error:', error);
+    res.status(500).json({ error: 'Failed to generate invoice receipt.' });
+  }
+});
+
+router.post('/:id/whatsapp-status', authenticate, async (req: Request, res: Response) => {
+  try {
+    const status = req.body?.status as string | undefined;
+    if (status !== 'sent' && status !== 'failed') {
+      res.status(400).json({ error: 'Invalid WhatsApp status.' });
+      return;
+    }
+
+    await prisma.invoice.update({
+      where: { id: req.params.id as string },
+      data: { whatsappSent: status === 'sent' },
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Update WhatsApp status error:', error);
+    res.status(500).json({ error: 'Failed to update WhatsApp status.' });
+  }
+});
+
 export default router;

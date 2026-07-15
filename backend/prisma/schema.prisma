@@ -238,6 +238,9 @@ model Invoice {
   items    InvoiceItem[]
   payments Payment[]
 
+  whatsappSent Boolean @default(false)
+  pdfUrl       String?
+
   @@index([customerId])
   @@index([createdById])
   @@index([invoiceDate])
