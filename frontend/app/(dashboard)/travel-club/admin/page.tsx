@@ -2,7 +2,17 @@
 
 import React, { useEffect, useState } from 'react';
 import { SendWhatsAppReceiptButton } from '@/components/SendWhatsAppReceiptButton';
-import { api, getApiAssetUrl } from '@/lib/api';
+import { api } from '@/lib/api';
+
+const getApiAssetUrl = (path: string): string => {
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const apiOrigin = apiBase.startsWith('http') ? apiBase.replace(/\/api$/, '') : '';
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+  return apiOrigin ? `${apiOrigin}${normalizedPath}` : normalizedPath;
+};
 
 interface BookingReceipt {
   pdfUrl?: string | null;
