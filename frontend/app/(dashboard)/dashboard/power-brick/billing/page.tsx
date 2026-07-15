@@ -279,35 +279,35 @@ export default function BillingPage() {
                 
                 <div className="space-y-4">
                   {items.map((item, i) => (
-                    <div key={i} className="grid grid-cols-12 gap-4 items-end group p-4 rounded-3xl bg-white/[0.01] border border-transparent hover:border-white/5 transition-all">
+                    <div key={i} className="grid grid-cols-12 gap-4 items-end group p-4 rounded-3xl bg-white/[0.01] border border-white/5 md:border-transparent hover:border-white/5 transition-all">
                       <div className="col-span-12 md:col-span-4">
                         <label className="block text-[9px] font-black text-zinc-600 mb-1.5 uppercase tracking-widest">Select Product</label>
                         <select value={item.materialId} onChange={e => updateItem(i, 'materialId', e.target.value)}
-                          className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-orange-500/50 appearance-none">
+                          className="w-full h-11 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-orange-500/50 appearance-none">
                           <option value="" className="bg-[#1a1a2e]">Select Material</option>
                           {materials.map(m => <option key={m.id} value={m.id} className="bg-[#1a1a2e]">{m.name} (Stock: {m.stock?.quantity || 0})</option>)}
                         </select>
                       </div>
-                      <div className="col-span-4 md:col-span-2">
+                      <div className="col-span-6 md:col-span-2">
                         <label className="block text-[9px] font-black text-zinc-600 mb-1.5 uppercase tracking-widest">Quantity</label>
                         <input type="number" value={item.quantity || ''} onChange={e => updateItem(i, 'quantity', +e.target.value)}
-                          className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-orange-500/50" />
+                          className="w-full h-11 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-orange-500/50" />
                       </div>
-                      <div className="col-span-4 md:col-span-2">
+                      <div className="col-span-6 md:col-span-2">
                         <label className="block text-[9px] font-black text-zinc-600 mb-1.5 uppercase tracking-widest">Unit Rate ₹</label>
                         <input type="number" value={item.rate || ''} onChange={e => updateItem(i, 'rate', +e.target.value)}
-                          className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-orange-500/50" />
+                          className="w-full h-11 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-orange-500/50" />
                       </div>
-                      <div className="col-span-3 md:col-span-2">
+                      <div className="col-span-8 md:col-span-2">
                         <label className="block text-[9px] font-black text-zinc-600 mb-1.5 uppercase tracking-widest">Item Total</label>
-                        <div className="px-4 py-3 rounded-xl bg-white/5 text-sm text-orange-400 font-black tracking-tighter">
+                        <div className="w-full h-11 px-4 py-2.5 rounded-xl bg-white/5 text-sm text-orange-400 font-black tracking-tighter flex items-center">
                           {formatCurrency(item.quantity * item.rate)}
                         </div>
                       </div>
-                      <div className="col-span-1 md:col-span-2 flex items-center justify-end">
+                      <div className="col-span-4 md:col-span-2 flex items-center justify-end pb-0.5">
                         {items.length > 1 && (
                           <button type="button" onClick={() => removeItem(i)} 
-                            className="p-3 text-zinc-600 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all">
+                            className="h-11 w-11 md:h-9 md:w-9 flex items-center justify-center text-zinc-600 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all border border-transparent hover:border-red-500/20">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         )}

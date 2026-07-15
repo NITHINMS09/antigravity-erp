@@ -228,36 +228,36 @@ export default function BakeryPurchasesPage() {
                   </div>
                   <div className="space-y-3">
                     {form.items.map((item, i) => (
-                      <div key={i} className="grid grid-cols-12 gap-3 items-end group">
-                        <div className="col-span-5">
-                          <label className="block text-[10px] font-bold text-zinc-600 mb-1 uppercase tracking-tighter">Product</label>
+                      <div key={i} className="grid grid-cols-12 gap-3 items-end group p-4 md:p-0 rounded-2xl md:rounded-none bg-white/[0.01] md:bg-transparent border border-white/5 md:border-none">
+                        <div className="col-span-12 md:col-span-5">
+                          <label className="block text-[10px] font-bold text-zinc-600 mb-1 uppercase tracking-widest md:tracking-tighter">Product</label>
                           <select value={item.productId} onChange={e => updateItem(i, 'productId', e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-pink-500/50 appearance-none">
+                            className="w-full h-11 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-pink-500/50 appearance-none">
                             <option value="" className="bg-[#1a1a2e]">Select Product</option>
                             {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                             {products.map((p: any) => <option key={p.id} value={p.id} className="bg-[#1a1a2e]">{p.name} ({p.unit})</option>)}
                           </select>
                         </div>
-                        <div className="col-span-2">
-                          <label className="block text-[10px] font-bold text-zinc-600 mb-1 uppercase tracking-tighter">Qty</label>
+                        <div className="col-span-6 md:col-span-2">
+                          <label className="block text-[10px] font-bold text-zinc-600 mb-1 uppercase tracking-widest md:tracking-tighter">Qty</label>
                           <input type="number" value={item.quantity || ''} onChange={e => updateItem(i, 'quantity', +e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-pink-500/50" />
+                            className="w-full h-11 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-pink-500/50" />
                         </div>
-                        <div className="col-span-2">
-                          <label className="block text-[10px] font-bold text-zinc-600 mb-1 uppercase tracking-tighter">Rate ₹</label>
+                        <div className="col-span-6 md:col-span-2">
+                          <label className="block text-[10px] font-bold text-zinc-600 mb-1 uppercase tracking-widest md:tracking-tighter">Rate ₹</label>
                           <input type="number" value={item.rate || ''} onChange={e => updateItem(i, 'rate', +e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-pink-500/50" />
+                            className="w-full h-11 px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-zinc-200 text-sm outline-none focus:ring-2 focus:ring-pink-500/50" />
                         </div>
-                        <div className="col-span-2">
-                          <label className="block text-[10px] font-bold text-zinc-600 mb-1 uppercase tracking-tighter">Total</label>
-                          <div className="px-4 py-3 rounded-xl bg-white/5 border border-transparent text-sm text-pink-400 font-black">
+                        <div className="col-span-9 md:col-span-2">
+                          <label className="block text-[10px] font-bold text-zinc-600 mb-1 uppercase tracking-widest md:tracking-tighter">Total</label>
+                          <div className="w-full h-11 px-4 py-2.5 rounded-xl bg-white/5 border border-transparent text-sm text-pink-400 font-black flex items-center">
                             {formatCurrency(item.quantity * item.rate)}
                           </div>
                         </div>
-                        <div className="col-span-1 pb-1 text-right">
+                        <div className="col-span-3 md:col-span-1 pb-0.5 text-right flex justify-end">
                           {form.items.length > 1 && (
                             <button type="button" onClick={() => removeItem(i)} 
-                              className="p-2.5 text-zinc-600 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all">
+                              className="h-11 w-11 md:h-9 md:w-9 flex items-center justify-center text-zinc-600 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all border border-transparent hover:border-red-500/20">
                               <X className="w-4 h-4" />
                             </button>
                           )}
