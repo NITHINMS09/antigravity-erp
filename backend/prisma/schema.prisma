@@ -5,6 +5,8 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // Neon serverless requires connection pooling
+  // The pooler URL already handles this, but we limit client-side connections
 }
 
 // ==================== AUTH & USERS ====================
@@ -238,6 +240,8 @@ model Invoice {
 
   @@index([customerId])
   @@index([createdById])
+  @@index([invoiceDate])
+  @@index([paymentStatus])
 }
 
 model InvoiceItem {
@@ -423,6 +427,11 @@ model Expense {
   month         String? // e.g., "2026-05"
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  @@index([category])
+  @@index([business])
+  @@index([month])
+  @@index([createdAt])
 }
 
 // ==================== AI REPORTS ====================
