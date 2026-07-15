@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { SendWhatsAppReceiptButton } from '@/components/SendWhatsAppReceiptButton';
-import api, { getApiAssetUrl } from '@/lib/api';
+import { api, getApiAssetUrl } from '@/lib/api';
 
 interface BookingReceipt {
   pdfUrl?: string | null;
